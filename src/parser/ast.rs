@@ -8,7 +8,6 @@ pub enum Statement {
     SubStatement(Variable, VariableOrNumberLiteral),
     PrintNumberStatement(Variable),
     PrintCharacterStatement(Variable),
-    Num(i32)
 }
 
 #[derive(Debug)]

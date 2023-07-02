@@ -1,15 +1,19 @@
 use chumsky::prelude::{*, text::Character};
+use crate::types::LexerOutput;
 mod ast;
 
-pub fn parser() -> impl Parser<char, ast::Program, Error = Simple<char>> {
+fn statement_parser() -> impl Parser<char, ast::Statement, Error = Simple<char>> {
     let inline_whitespace = filter(|c: &char| c.is_inline_whitespace()).repeated();
-    let newline = just('\n');
 
     let to_be = text::keyword("was")
         .or(text::keyword("were"))
         .or(text::keyword("is"))
         .or(text::keyword("are"))
         .padded_by(inline_whitespace);
+
+    let as_keyword = text::keyword("as").padded_by(inline_whitespace);
+    let felt_keyword = text::keyword("felt").padded_by(inline_whitespace);
+    let positive_adjective = text::keyword("good").padded_by(inline_whitespace);    
 
     let ident = 
         text::ident()
@@ -29,10 +33,6 @@ pub fn parser() -> impl Parser<char, ast::Program, Error = Simple<char>> {
             ast::VariableOrNumberLiteral(b)
         ));
 
-    let as_keyword = text::keyword("as").padded_by(inline_whitespace);
-    let felt_keyword = text::keyword("felt").padded_by(inline_whitespace);
-    let positive_adjective = text::keyword("good").padded_by(inline_whitespace);
-
     let addition_statement =
         take_until(felt_keyword)
         .then_ignore(as_keyword.clone())
@@ -44,19 +44,21 @@ pub fn parser() -> impl Parser<char, ast::Program, Error = Simple<char>> {
             ast::VariableOrNumberLiteral(b)
         ));
 
-    let statement =
-        newline.not().rewind()
-        .ignore_then(inline_whitespace.ignore_then(
-            addition_statement.or(assignment_statement)
-        ))
-        .then_ignore(just("."));
+    let statement = assignment_statement
+        .or(addition_statement);
 
-    let block = statement.repeated()
-        .map(|statements| ast::Block(statements));
+    statement
+}
 
-    let program = block.separated_by(newline.repeated().exactly(2))
-        .then_ignore(end())
-        .map(|blocks| ast::Program(blocks));
-
-    program
+pub fn parse_program(input: LexerOutput) -> ast::Program {
+    ast::Program(input.0.iter().map(|block| {
+        let statements = block.0.iter().map(|statement| {
+            let parsed_statement = match statement_parser().parse(statement.0.as_str()) {
+                Ok(s) => s,
+                Err(_) => panic!("Failed to parse statement")
+            };
+            parsed_statement
+        });
+        ast::Block(statements.collect())
+    }).collect())
 }
