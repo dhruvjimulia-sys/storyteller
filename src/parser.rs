@@ -13,7 +13,8 @@ fn statement_parser() -> impl Parser<char, ast::Statement, Error = Simple<char>>
 
     let as_keyword = text::keyword("as").padded_by(inline_whitespace);
     let felt_keyword = text::keyword("felt").padded_by(inline_whitespace);
-    let positive_adjective = text::keyword("good").padded_by(inline_whitespace);    
+    let positive_adjective = text::keyword("good").padded_by(inline_whitespace);
+    let negative_adjective = text::keyword("bad").padded_by(inline_whitespace);
 
     let ident = 
         text::ident()
@@ -34,18 +35,30 @@ fn statement_parser() -> impl Parser<char, ast::Statement, Error = Simple<char>>
         ));
 
     let addition_statement =
-        take_until(felt_keyword)
+        take_until(felt_keyword.clone())
         .then_ignore(as_keyword.clone())
         .then_ignore(positive_adjective)
-        .then_ignore(as_keyword)
+        .then_ignore(as_keyword.clone())
         .then(idents)
         .map(|((a, _), b)| ast::Statement::AddStatement(
             ast::Variable(a.into_iter().collect()),
             ast::VariableOrNumberLiteral(b)
         ));
+    
+    let subtraction_statement =
+        take_until(felt_keyword)
+        .then_ignore(as_keyword.clone())
+        .then_ignore(negative_adjective)
+        .then_ignore(as_keyword)
+        .then(idents)
+        .map(|((a, _), b)| ast::Statement::SubStatement(
+            ast::Variable(a.into_iter().collect()),
+            ast::VariableOrNumberLiteral(b)
+        ));
 
     let statement = assignment_statement
-        .or(addition_statement);
+        .or(addition_statement)
+        .or(subtraction_statement);
 
     statement
 }
