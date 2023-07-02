@@ -16,5 +16,8 @@ fn main() {
             return;
         }
     };
-    println!("{:?}", parser::parser().parse(file_contents));
+    match parser::parser().parse(file_contents) {
+        Ok(ast) => println!("{:?}", ast),
+        Err(e) => println!("ParseError"),
+    }
 }

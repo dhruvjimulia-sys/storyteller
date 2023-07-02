@@ -3,9 +3,9 @@ pub struct Program(pub Vec<Block>);
 
 #[derive(Debug)]
 pub enum Statement {
-    AssignmentStatement(Variable, Expression),
-    AddStatement(Variable, Expression),
-    SubStatement(Variable, Expression),
+    AssignmentStatement(Variable, VariableOrNumberLiteral),
+    AddStatement(Variable, VariableOrNumberLiteral),
+    SubStatement(Variable, VariableOrNumberLiteral),
     PrintNumberStatement(Variable),
     PrintCharacterStatement(Variable),
     Num(i32)
@@ -15,10 +15,7 @@ pub enum Statement {
 pub struct Block(pub Vec<Statement>);
 
 #[derive(Debug)]
-struct Variable(String);
+pub struct Variable(pub String);
 
 #[derive(Debug)]
-enum Expression {
-    NumberLiteral(i32),
-    Variable(Variable)
-}
+pub struct VariableOrNumberLiteral(pub String);

@@ -1,20 +1,42 @@
-use chumsky::{prelude::*, text::Character};
+use chumsky::prelude::{*, text::Character};
 mod ast;
 
 pub fn parser() -> impl Parser<char, ast::Program, Error = Simple<char>> {
-    /*
-    filter(|c: &char| c.is_ascii_digit())
-    .map(|c| ast::Statement::Num { value: c.to_digit(10).unwrap() as i32 })
-    .padded_by(filter(|c: &char| c.is_whitespace()).repeated())
-    .then_ignore(end())
-    */
+    let inline_whitespace = filter(|c: &char| c.is_inline_whitespace()).repeated();
+    let newline = just('\n');
 
-    let block = text::int(10)
-        .map(|s: String| ast::Block(vec!(ast::Statement::Num(s.parse().unwrap()))))
-        .padded_by(filter(|c: &char| c.is_inline_whitespace()).repeated());
+    let to_be = text::keyword("was")
+        .or(text::keyword("were"))
+        .or(text::keyword("is"))
+        .or(text::keyword("are"))
+        .padded_by(inline_whitespace);
 
-    let blocks = block.separated_by(just("\n\n"))
+    let ident = 
+        text::ident()
+        .padded_by(inline_whitespace);
+
+    let idents =
+        ident
+        .repeated()
+        .map(|vec| vec.join(" "))
+        .padded_by(inline_whitespace);
+
+    let statement =
+        newline.not().rewind()
+        .ignore_then(inline_whitespace.ignore_then(take_until(to_be)))
+        .then(idents)
+        .then_ignore(just("."))
+        .map(|((a, _), b)| ast::Statement::AssignmentStatement(
+            ast::Variable(a.into_iter().collect()),
+            ast::VariableOrNumberLiteral(b)
+        ));
+
+    let block = statement.repeated()
+        .map(|statements| ast::Block(statements));
+
+    let program = block.separated_by(newline.repeated().exactly(2))
+        .then_ignore(end())
         .map(|blocks| ast::Program(blocks));
 
-    blocks
+    program
 }
