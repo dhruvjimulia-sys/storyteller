@@ -21,15 +21,35 @@ pub fn parser() -> impl Parser<char, ast::Program, Error = Simple<char>> {
         .map(|vec| vec.join(" "))
         .padded_by(inline_whitespace);
 
-    let statement =
-        newline.not().rewind()
-        .ignore_then(inline_whitespace.ignore_then(take_until(to_be)))
+    let assignment_statement =
+        take_until(text::keyword(".").or(to_be))
         .then(idents)
-        .then_ignore(just("."))
         .map(|((a, _), b)| ast::Statement::AssignmentStatement(
             ast::Variable(a.into_iter().collect()),
             ast::VariableOrNumberLiteral(b)
         ));
+
+    let as_keyword = text::keyword("as").padded_by(inline_whitespace);
+    let felt_keyword = text::keyword("felt").padded_by(inline_whitespace);
+    let positive_adjective = text::keyword("good").padded_by(inline_whitespace);
+
+    let addition_statement =
+        take_until(felt_keyword)
+        .then_ignore(as_keyword.clone())
+        .then_ignore(positive_adjective)
+        .then_ignore(as_keyword)
+        .then(idents)
+        .map(|((a, _), b)| ast::Statement::AddStatement(
+            ast::Variable(a.into_iter().collect()),
+            ast::VariableOrNumberLiteral(b)
+        ));
+
+    let statement =
+        newline.not().rewind()
+        .ignore_then(inline_whitespace.ignore_then(
+            addition_statement.or(assignment_statement)
+        ))
+        .then_ignore(just("."));
 
     let block = statement.repeated()
         .map(|statements| ast::Block(statements));

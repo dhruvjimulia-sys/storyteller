@@ -1,5 +1,6 @@
 use chumsky::prelude::*;
 mod parser;
+mod lexer;
 
 fn main() {
     let file_name = match std::env::args().nth(1) {
@@ -16,8 +17,14 @@ fn main() {
             return;
         }
     };
+    /*
     match parser::parser().parse(file_contents) {
         Ok(ast) => println!("{:?}", ast),
         Err(e) => println!("ParseError"),
+    }
+    */
+    match lexer::lexer().parse(file_contents) {
+        Ok(lexer_output) => println!("{:?}", lexer_output),
+        Err(errors) => println!("ParseError {:#?}", errors)
     }
 }
