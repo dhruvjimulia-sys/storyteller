@@ -1,7 +1,9 @@
 use chumsky::prelude::*;
-mod parser;
+pub mod parser;
 mod lexer;
 mod types;
+#[cfg(test)]
+mod tests;
 
 fn main() {
     let file_name = match std::env::args().nth(1) {

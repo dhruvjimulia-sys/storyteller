@@ -1,9 +1,11 @@
 use chumsky::prelude::{*, text::Character};
 use crate::types::LexerOutput;
-mod ast;
+pub mod ast;
 
 fn statement_parser() -> impl Parser<char, ast::Statement, Error = Simple<char>> {
     let inline_whitespace = filter(|c: &char| c.is_inline_whitespace()).repeated();
+
+    let quote = just("\"").padded_by(inline_whitespace);
 
     let to_be = text::keyword("was")
         .or(text::keyword("were"))
@@ -15,6 +17,7 @@ fn statement_parser() -> impl Parser<char, ast::Statement, Error = Simple<char>>
     let felt_keyword = text::keyword("felt").padded_by(inline_whitespace);
     let positive_adjective = text::keyword("good").padded_by(inline_whitespace);
     let negative_adjective = text::keyword("bad").padded_by(inline_whitespace);
+    let said_keyword = text::keyword("said").padded_by(inline_whitespace);
 
     let ident = 
         text::ident()
@@ -56,9 +59,38 @@ fn statement_parser() -> impl Parser<char, ast::Statement, Error = Simple<char>>
             ast::VariableOrNumberLiteral(b)
         ));
 
-    let statement = assignment_statement
+    let complete_quote = quote.then_ignore(none_of("\"").repeated().then_ignore(quote));
+
+    let print_number_statement =
+        complete_quote.clone().ignore_then(take_until(said_keyword.clone()))
+        .or(
+            take_until(said_keyword)
+            .then_ignore(just(",").or_not())
+            .then_ignore(complete_quote)
+        )
+        .map(|(number, _)| ast::Statement::PrintNumberStatement(
+            ast::Variable(number.into_iter().collect())
+        ));
+        
+    
+    /* 
+    let print_character_statement =
+        take_until(said_keyword)
+        .then_ignore(just(",").or_not())
+        .then_ignore(one_of("\"\'").padded_by(inline_whitespace))
+        .then_ignore(none_of("\"\'").padded_by(inline_whitespace))
+        .map(|(number, _)| ast::Statement::PrintCharacterStatement(
+            ast::Variable(number.into_iter().collect())
+        ));
+    */
+
+    let statement =
+    // print_character_statement
+    print_number_statement
+        .or(assignment_statement)
         .or(addition_statement)
         .or(subtraction_statement);
+        
 
     statement
 }
