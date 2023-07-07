@@ -3,7 +3,7 @@ pub mod parser;
 mod lexer;
 mod types;
 #[cfg(test)]
-mod tests;
+mod unit_tests;
 
 fn main() {
     let file_name = match std::env::args().nth(1) {
