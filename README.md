@@ -1,7 +1,9 @@
 # Storyteller
 
-Storyteller is not just another programming language; it's an artistic medium that allows you to express your ideas in the most compelling way possible. Gone are the days of  dry and sterile syntax. With Storyteller, your programs start brimming with life.
+Storyteller is a Turing-complete, dynamically-typed  programming language, designed to make your code look like rich, emotional narrative. Gone are the days of dry and sterile syntax. With Storyteller, your programs will start brimming with life.
 
-### But why?
+### Why Learn Storyteller?
 
-Because by adopting Storyteller, you'll render all those recruiters and hiring managers speechless. By adding this language to your CV, you are going to leave your recruiter so utterly amazed that they would be compelled to give you an offer for your dream job. Trust me, they'll not even ask you for an interview.
+Because, after adding this language to your CV, you'll render any recruiters and hiring managers you meet speechless. They will simply be so confused about what to do with your application, they will have to offer you the role you applied for.
+
+Plus, Storyteller provides my fellow English majors with immense opportunities in the tech industry: their natural poetic flair and liguistic expertise will definitely help them in write more idiomatic Storyteller code.
