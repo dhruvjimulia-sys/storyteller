@@ -1,6 +1,6 @@
 # Storyteller
 
-Storyteller is a Turing-complete, dynamically-typed  programming language, designed to make your code look like rich, emotional narrative. Gone are the days of dry and sterile syntax. With Storyteller, your programs will start brimming with life.
+Storyteller is a Turing-complete, dynamically-typed  programming language, designed to make your code look like rich, emotional narrative. Gone are the days of dry, sterile syntax. With Storyteller, your programs will start brimming with life.
 
 ### Why Learn Storyteller?
 
