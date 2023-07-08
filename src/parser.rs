@@ -59,14 +59,14 @@ fn statement_parser() -> impl Parser<char, ast::Statement, Error = Simple<char>>
             ast::VariableOrNumberLiteral(b)
         ));
 
-    let complete_quote = quote.then_ignore(none_of("\"").repeated().then_ignore(quote));
-
     let print_number_statement =
-        complete_quote.clone().ignore_then(take_until(said_keyword.clone()))
+        quote.ignore_then(
+            none_of("\"").repeated().
+            ignore_then(quote.ignore_then(take_until(said_keyword.clone())).then_ignore(end())))
         .or(
             take_until(said_keyword)
             .then_ignore(just(",").or_not())
-            .then_ignore(complete_quote)
+            .then_ignore(quote.then_ignore(none_of("\"").repeated().then_ignore(quote)))
         )
         .map(|(number, _)| ast::Statement::PrintNumberStatement(
             ast::Variable(number.into_iter().collect())

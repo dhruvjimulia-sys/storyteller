@@ -113,3 +113,34 @@ fn parser_correctly_parses_print_number_statement() {
         ]
     )]));
 }
+
+#[test]
+fn parser_correctly_parses_print_number_statement_without_comma() {
+    let program = "Charlie said \"I am a wizard\".";
+    let lexer_output = lexer::lexer().parse(program).unwrap();
+    let ast = parser::parse_program(lexer_output);
+
+    assert_eq!(ast, ast::Program(vec![ast::Block(
+        vec![
+            ast::Statement::PrintNumberStatement(
+                ast::Variable("Charlie".to_string())
+            )
+        ]
+    )]));
+}
+
+
+#[test]
+fn parser_correctly_parses_print_number_statement_opposite() {
+    let program = "\"I am a wizard!\" Charlie said.";
+    let lexer_output = lexer::lexer().parse(program).unwrap();
+    let ast = parser::parse_program(lexer_output);
+
+    assert_eq!(ast, ast::Program(vec![ast::Block(
+        vec![
+            ast::Statement::PrintNumberStatement(
+                ast::Variable("Charlie".to_string())
+            )
+        ]
+    )]));
+}
