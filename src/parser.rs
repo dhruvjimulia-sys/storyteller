@@ -18,6 +18,9 @@ fn statement_parser() -> impl Parser<char, ast::Statement, Error = Simple<char>>
     let positive_adjective = text::keyword("good").padded_by(inline_whitespace);
     let negative_adjective = text::keyword("bad").padded_by(inline_whitespace);
     let said_keyword = text::keyword("said").padded_by(inline_whitespace);
+    let comma = just(",").padded_by(inline_whitespace);
+    let inner_quote = none_of("\"").repeated();
+    let adverb_keyword = just("earnestly").padded_by(inline_whitespace);
 
     let ident = 
         text::ident()
@@ -60,33 +63,26 @@ fn statement_parser() -> impl Parser<char, ast::Statement, Error = Simple<char>>
         ));
 
     let print_number_statement =
-        quote.ignore_then(
-            none_of("\"").repeated().
-            ignore_then(quote.ignore_then(take_until(said_keyword.clone())).then_ignore(end())))
-        .or(
-            take_until(said_keyword)
-            .then_ignore(just(",").or_not())
-            .then_ignore(quote.then_ignore(none_of("\"").repeated().then_ignore(quote)))
-        )
+        quote.ignore_then(inner_quote.clone().ignore_then(quote.ignore_then(take_until(said_keyword.clone()))))
+        .or(take_until(said_keyword.clone()).then_ignore(comma.or_not()).then_ignore(quote.then_ignore(inner_quote.clone().then_ignore(quote))))
         .map(|(number, _)| ast::Statement::PrintNumberStatement(
             ast::Variable(number.into_iter().collect())
         ));
         
-    
-    /* 
     let print_character_statement =
-        take_until(said_keyword)
-        .then_ignore(just(",").or_not())
-        .then_ignore(one_of("\"\'").padded_by(inline_whitespace))
-        .then_ignore(none_of("\"\'").padded_by(inline_whitespace))
+        quote.ignore_then(inner_quote.clone().ignore_then(quote
+            .ignore_then(comma.clone().or_not().ignore_then(take_until(said_keyword.clone()))).then_ignore(adverb_keyword))
+        )
+        .or(
+            take_until(said_keyword).then_ignore(adverb_keyword).then_ignore(comma.or_not()).then_ignore(quote.then_ignore(inner_quote.then_ignore(quote)))
+        )
         .map(|(number, _)| ast::Statement::PrintCharacterStatement(
             ast::Variable(number.into_iter().collect())
         ));
-    */
 
     let statement =
-    // print_character_statement
-    print_number_statement
+        print_character_statement
+        .or(print_number_statement)
         .or(assignment_statement)
         .or(addition_statement)
         .or(subtraction_statement);

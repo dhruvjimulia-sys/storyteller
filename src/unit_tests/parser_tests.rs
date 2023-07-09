@@ -144,3 +144,33 @@ fn parser_correctly_parses_print_number_statement_opposite() {
         ]
     )]));
 }
+
+#[test]
+fn parser_correctly_parses_print_character_statement() {
+    let program = "Charlie said earnestly, \"I am a wizard!\".";
+    let lexer_output = lexer::lexer().parse(program).unwrap();
+    let ast = parser::parse_program(lexer_output);
+
+    assert_eq!(ast, ast::Program(vec![ast::Block(
+        vec![
+            ast::Statement::PrintCharacterStatement(
+                ast::Variable("Charlie".to_string())
+            )
+        ]
+    )]));
+}
+
+#[test]
+fn parser_correctly_parses_print_character_statement_opposite() {
+    let program = "\"I am a wizard!\" Charlie said earnestly.";
+    let lexer_output = lexer::lexer().parse(program).unwrap();
+    let ast = parser::parse_program(lexer_output);
+
+    assert_eq!(ast, ast::Program(vec![ast::Block(
+        vec![
+            ast::Statement::PrintCharacterStatement(
+                ast::Variable("Charlie".to_string())
+            )
+        ]
+    )]));
+}
