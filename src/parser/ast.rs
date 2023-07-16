@@ -9,7 +9,8 @@ pub enum Statement {
     PrintNumberStatement(Variable),
     PrintCharacterStatement(Variable),
     InputStatement(Variable),
-    ExitStatement
+    ExitStatement,
+    GotoStatement(VariableOrNumberLiteral)
 }
 
 #[derive(Debug, PartialEq)]

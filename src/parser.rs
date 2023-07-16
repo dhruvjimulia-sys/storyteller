@@ -104,6 +104,20 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
             ast::Variable(lexer_tokens_to_name(name))
         ));
 
+    let goto_keywords =
+        keyword("go").then(keyword("to"))
+        .or(keyword("goes").then(keyword("to")))
+        .or(keyword("went").then(keyword("to")))
+        .or(keyword("gone").then(keyword("to")))
+        .or(keyword("going").then(keyword("to")));
+
+    let goto_statement =
+        take_until(goto_keywords)
+        .ignore_then(take_until(end()))
+        .map(|(name, _)| ast::Statement::GotoStatement(
+            ast::VariableOrNumberLiteral(lexer_tokens_to_name(name))
+        ));
+
     let exit_statement =
         take_until(keyword("end"))
         .map(|_| ast::Statement::ExitStatement);
@@ -115,6 +129,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         .or(assignment_statement)
         .or(addition_statement)
         .or(subtraction_statement)
+        .or(goto_statement)
         .or(exit_statement);
 
     statement

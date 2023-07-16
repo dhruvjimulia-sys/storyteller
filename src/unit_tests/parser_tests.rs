@@ -207,3 +207,17 @@ fn parser_correctly_parses_exit_statements() {
         ]
     )]));
 }
+
+
+#[test]
+fn parser_correctly_parses_goto_statement() {
+    let program = "Cindrella wished she could go to heaven.";
+    let lexer_output = preprocessor::preprocess(lexer::lexer().parse(program).unwrap());
+    let ast = parser::parse_program(lexer_output);
+
+    assert_eq!(ast, ast::Program(vec![ast::Block(
+        vec![
+            ast::Statement::GotoStatement(ast::VariableOrNumberLiteral("heaven".to_string()))
+        ]
+    )]));
+}
