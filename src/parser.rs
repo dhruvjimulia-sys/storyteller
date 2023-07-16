@@ -59,29 +59,22 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         ));
 
     let quote = just(LexerToken::Quote);
-    let comma = just(LexerToken::Comma);
     let inner_quote = none_of(vec![LexerToken::Quote]).repeated();
 
     let print_number_statement =
         quote.clone()
         .ignore_then(inner_quote.clone()
         .ignore_then(quote.clone().ignore_then(take_until(said_keyword.clone()))))
-        .or(
-            take_until(said_keyword.clone())
-            .then_ignore(comma.clone().or_not())
-            .then_ignore(quote.clone().then_ignore(inner_quote.clone().then_ignore(quote.clone())))
-        )
         .map(|(number, _)| ast::Statement::PrintNumberStatement(
             ast::Variable(lexer_tokens_to_name(number)))
         );
 
     let print_character_statement =
-        quote.clone().ignore_then(inner_quote.clone().ignore_then(quote.clone()
-            .ignore_then(comma.clone().or_not().ignore_then(take_until(said_keyword.clone()))).then_ignore(adverb_keyword.clone()))
-        )
-        .or(
-            take_until(said_keyword).then_ignore(adverb_keyword).then_ignore(comma.or_not()).then_ignore(quote.clone().then_ignore(inner_quote.then_ignore(quote)))
-        )
+        quote.clone()
+        .ignore_then(inner_quote.clone()
+        .ignore_then(quote.clone()
+        .ignore_then(take_until(said_keyword.clone()))
+        .then_ignore(adverb_keyword.clone())))
         .map(|(number, _)| ast::Statement::PrintCharacterStatement(
             ast::Variable(lexer_tokens_to_name(number))
         ));
