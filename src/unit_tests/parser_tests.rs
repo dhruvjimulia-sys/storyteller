@@ -128,3 +128,51 @@ fn parser_correctly_parses_print_character_statement() {
         ]
     )]));
 }
+
+#[test]
+fn parser_correctly_parses_statements_that_end_in_exclamation_marks() {
+    let program = "Bob was running! Katniss was tired. John was swimming!";
+    let lexer_output = lexer::lexer().parse(program).unwrap();
+    let ast = parser::parse_program(lexer_output);
+
+    assert_eq!(ast, ast::Program(vec![ast::Block(
+        vec![
+            ast::Statement::AssignmentStatement(
+                ast::Variable("Bob".to_string()),
+                ast::VariableOrNumberLiteral("running".to_string())
+            ),
+            ast::Statement::AssignmentStatement(
+                ast::Variable("Katniss".to_string()),
+                ast::VariableOrNumberLiteral("tired".to_string())
+            ),
+            ast::Statement::AssignmentStatement(
+                ast::Variable("John".to_string()),
+                ast::VariableOrNumberLiteral("swimming".to_string())
+            )
+        ]
+    )]));
+}
+
+#[test]
+fn parser_correctly_parses_statements_that_end_in_question_marks() {
+    let program = "Bob was running? Katniss was tired. John was swimming?";
+    let lexer_output = lexer::lexer().parse(program).unwrap();
+    let ast = parser::parse_program(lexer_output);
+
+    assert_eq!(ast, ast::Program(vec![ast::Block(
+        vec![
+            ast::Statement::AssignmentStatement(
+                ast::Variable("Bob".to_string()),
+                ast::VariableOrNumberLiteral("running".to_string())
+            ),
+            ast::Statement::AssignmentStatement(
+                ast::Variable("Katniss".to_string()),
+                ast::VariableOrNumberLiteral("tired".to_string())
+            ),
+            ast::Statement::AssignmentStatement(
+                ast::Variable("John".to_string()),
+                ast::VariableOrNumberLiteral("swimming".to_string())
+            )
+        ]
+    )]));
+}

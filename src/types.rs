@@ -9,5 +9,7 @@ pub enum LexerToken {
     Comma,
     Quote,
     Period,
+    QuestionMark,
+    ExclamationMark,
     Text(String)
 }

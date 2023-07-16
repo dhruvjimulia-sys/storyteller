@@ -90,9 +90,13 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
 }
 
 fn statement_block_parser() -> impl Parser<LexerToken, ast::Block, Error = Simple<LexerToken>> {
+    let sentence_end_punctuation = just(LexerToken::Period)
+        .or(just(LexerToken::QuestionMark))
+        .or(just(LexerToken::ExclamationMark));
+
     let block_parser =
-        just(LexerToken::Period).not().repeated()
-        .separated_by(just(LexerToken::Period))
+        sentence_end_punctuation.clone().not().repeated()
+        .separated_by(sentence_end_punctuation)
         .allow_trailing()
         .map(|statements| {
             ast::Block(statements.into_iter()

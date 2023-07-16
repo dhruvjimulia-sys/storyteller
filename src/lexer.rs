@@ -9,7 +9,9 @@ pub fn lexer() -> impl Parser<char, LexerOutput, Error = Simple<char>> {
         text::ident::<_, Simple<char>>().map(|s| LexerToken::Text(s.to_string()))
         .or(just(",").map(|_| LexerToken::Comma))
         .or(just("\"").map(|_| LexerToken::Quote))
-        .or(just(".").map(|_| LexerToken::Period));
+        .or(just(".").map(|_| LexerToken::Period))
+        .or(just("?").map(|_| LexerToken::QuestionMark))
+        .or(just("!").map(|_| LexerToken::ExclamationMark));
 
     let block = 
         newline.not().rewind()
