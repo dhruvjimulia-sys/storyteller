@@ -1,3 +1,5 @@
+Variable names cannot have " or , (not done yet -> can do with try_map)
+Number of spaces in variable names do not matter
 
 Tokens solve all these problems
 Cannot do "said Charlie" -> has to be "Charlie said" (reconsidering)
