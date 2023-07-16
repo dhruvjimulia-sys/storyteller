@@ -162,7 +162,7 @@ fn parser_correctly_parses_print_character_statement() {
 
 #[test]
 fn parser_correctly_parses_print_character_statement_opposite() {
-    let program = "\"I am a wizard\" Charlie said earnestly.";
+    let program = "\"I am a wizard\" Charlie said slyly.";
     let lexer_output = lexer::lexer().parse(program).unwrap();
     let ast = parser::parse_program(lexer_output);
 

@@ -23,7 +23,10 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
     let positive_adjective = keyword("good");
     let negative_adjective = keyword("bad");
     let said_keyword = keyword("said");
-    let adverb_keyword = keyword("earnestly");
+    let adverb_keyword = filter(|token: &LexerToken| match token {
+        LexerToken::Text(s) => s.ends_with("ly"),
+        _ => false
+    });
 
     let assignment_statement =
         take_until(to_be)
