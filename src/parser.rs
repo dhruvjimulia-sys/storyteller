@@ -1,6 +1,7 @@
 use chumsky::prelude::*;
 use chumsky::primitive::Just;
 use crate::types::{LexerOutput, LexerToken};
+use std::collections::HashSet;
 pub mod ast;
 
 fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<LexerToken>> {
@@ -9,7 +10,14 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
     }
 
     fn lexer_tokens_to_name(vec: Vec<LexerToken>) -> String {
-        vec.into_iter().map(|token| match token {
+        let articles_and_possessives = HashSet::from(["a", "an", "the", "my", "your", "his", "her", "its", "our", "their"]);
+
+        vec.into_iter()
+        .filter(|token| match token {
+            LexerToken::Text(s) => !articles_and_possessives.contains(s.as_str()),
+            _ => true
+        })
+        .map(|token| match token {
             LexerToken::Text(s) => s,
             _ => "".to_string()
         }).collect::<Vec<_>>().join(" ")

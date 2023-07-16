@@ -1,5 +1,4 @@
 use crate::types::{LexerOutput, LexerToken, LexerBlock};
-use std::collections::HashSet;
 
 fn lowercase_all_tokens(tokens: LexerOutput) -> LexerOutput {
     LexerOutput(tokens.0.into_iter().map(|block| {
@@ -7,19 +6,6 @@ fn lowercase_all_tokens(tokens: LexerOutput) -> LexerOutput {
             match token {
                 LexerToken::Text(s) => LexerToken::Text(s.to_lowercase()),
                 _ => token
-            }
-        }).collect::<Vec<_>>())
-    }).collect::<Vec<_>>())
-}
-
-fn remove_articles_and_possessives(tokens: LexerOutput) -> LexerOutput {
-    let articles_and_possessives = HashSet::from(["a", "an", "the", "my", "your", "his", "her", "its", "our", "their"]);
-
-    LexerOutput(tokens.0.into_iter().map(|block| {
-        LexerBlock(block.0.into_iter().filter(|token| {
-            match token {
-                LexerToken::Text(s) => !articles_and_possessives.contains(&s.as_str()),
-                _ => true
             }
         }).collect::<Vec<_>>())
     }).collect::<Vec<_>>())
@@ -48,5 +34,5 @@ fn remove_end_sentence_punctuation_in_quotes(tokens: LexerOutput) -> LexerOutput
 }
 
 pub fn preprocess(tokens: LexerOutput) -> LexerOutput {
-    remove_end_sentence_punctuation_in_quotes(remove_articles_and_possessives(lowercase_all_tokens(tokens)))
+    remove_end_sentence_punctuation_in_quotes(lowercase_all_tokens(tokens))
 }
