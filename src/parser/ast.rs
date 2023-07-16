@@ -8,6 +8,8 @@ pub enum Statement {
     SubStatement(Variable, VariableOrNumberLiteral),
     PrintNumberStatement(Variable),
     PrintCharacterStatement(Variable),
+    InputStatement(Variable),
+    ExitStatement
 }
 
 #[derive(Debug, PartialEq)]

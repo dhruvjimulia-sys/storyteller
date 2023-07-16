@@ -67,6 +67,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         ));
 
     let quote = just(LexerToken::Quote);
+    let comma = just(LexerToken::Comma);
     let inner_quote = none_of(vec![LexerToken::Quote]).repeated();
 
     let print_number_statement =
@@ -87,12 +88,34 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
             ast::Variable(lexer_tokens_to_name(number))
         ));
 
+    let input_statement =
+        take_until(keyword("looked").or(keyword("looks")))
+        .then_ignore(keyword("up"))
+        .then_ignore(keyword("to"))
+        .then_ignore(keyword("the"))
+        .then_ignore(keyword("skies"))
+        .then_ignore(keyword("beyond"))
+        .then_ignore(comma)
+        .then_ignore(keyword("waiting"))
+        .then_ignore(keyword("for"))
+        .then_ignore(keyword("an"))
+        .then_ignore(keyword("answer"))
+        .map(|(name, _)| ast::Statement::InputStatement(
+            ast::Variable(lexer_tokens_to_name(name))
+        ));
+
+    let exit_statement =
+        take_until(keyword("end"))
+        .map(|_| ast::Statement::ExitStatement);
+
     let statement =
-        print_character_statement
+        input_statement
+        .or(print_character_statement)
         .or(print_number_statement)
         .or(assignment_statement)
         .or(addition_statement)
-        .or(subtraction_statement);
+        .or(subtraction_statement)
+        .or(exit_statement);
 
     statement
 }

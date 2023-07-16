@@ -177,3 +177,33 @@ fn parser_correctly_parses_statements_that_end_in_question_marks() {
         ]
     )]));
 }
+
+
+#[test]
+fn parser_correctly_parses_input_statements() {
+    let program = "Taylor looked up to the skies beyond, waiting for an answer.";
+    let lexer_output = preprocessor::preprocess(lexer::lexer().parse(program).unwrap());
+    let ast = parser::parse_program(lexer_output);
+
+    assert_eq!(ast, ast::Program(vec![ast::Block(
+        vec![
+            ast::Statement::InputStatement(
+                ast::Variable("taylor".to_string())
+            )
+        ]
+    )]));
+}
+
+
+#[test]
+fn parser_correctly_parses_exit_statements() {
+    let program = "I hoped with all my heart that all this misery comes to an end.";
+    let lexer_output = preprocessor::preprocess(lexer::lexer().parse(program).unwrap());
+    let ast = parser::parse_program(lexer_output);
+
+    assert_eq!(ast, ast::Program(vec![ast::Block(
+        vec![
+            ast::Statement::ExitStatement
+        ]
+    )]));
+}
