@@ -1,6 +1,7 @@
 use chumsky::prelude::*;
 pub mod parser;
 mod lexer;
+mod preprocessor;
 mod types;
 #[cfg(test)]
 mod unit_tests;
