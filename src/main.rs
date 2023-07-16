@@ -1,6 +1,4 @@
 use chumsky::prelude::*;
-use crate::types::{LexerStatement, LexerToken};
-use chumsky::primitive::Just;
 pub mod parser;
 mod lexer;
 mod types;
@@ -39,6 +37,8 @@ fn main() {
 
 
     // let test_parser: Just<LexerToken, LexerToken, Simple<LexerToken>> = just(LexerToken::Text("quick".to_string()));
+
+    /* 
     fn keyword(keyword: &str) -> Just<LexerToken, LexerToken, Simple<LexerToken>> {
         just(LexerToken::Text(keyword.to_string()))
     }
@@ -53,8 +53,7 @@ fn main() {
         .then_ignore(quote.clone()
         .then_ignore(inner_quote.then_ignore(quote)));
 
-
-    let test_statement = LexerStatement(vec!(
+    let test_statement = LexerBlock(vec!(
         LexerToken::Text("Charlie".to_string()),
         LexerToken::Text("said".to_string()),
         LexerToken::Text("earnestly".to_string()),
@@ -64,6 +63,9 @@ fn main() {
         LexerToken::Text("a".to_string()),
         LexerToken::Text("wizard".to_string()),
         LexerToken::Quote));
+    */
 
-    println!("{:?}", test_parser.parse(test_statement.0));
+    let test_parser = any::<char, Simple<char>>().repeated().separated_by(just(","));
+
+    println!("{:?}", test_parser.parse("d,e,f"));
 }

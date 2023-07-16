@@ -1,8 +1,5 @@
 #[derive(Debug)]
-pub struct LexerStatement(pub Vec<LexerToken>);
-
-#[derive(Debug)]
-pub struct LexerBlock(pub Vec<LexerStatement>);
+pub struct LexerBlock(pub Vec<LexerToken>);
 
 #[derive(Debug)]
 pub struct LexerOutput(pub Vec<LexerBlock>);
@@ -11,5 +8,6 @@ pub struct LexerOutput(pub Vec<LexerBlock>);
 pub enum LexerToken {
     Comma,
     Quote,
+    Period,
     Text(String)
 }

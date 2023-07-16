@@ -89,15 +89,25 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
     statement
 }
 
+fn statement_block_parser() -> impl Parser<LexerToken, ast::Block, Error = Simple<LexerToken>> {
+    let block_parser =
+        just(LexerToken::Period).not().repeated()
+        .separated_by(just(LexerToken::Period))
+        .allow_trailing()
+        .map(|statements| {
+            ast::Block(statements.into_iter()
+            .filter(|statement| !statement.is_empty())
+            .map(|statement| statement_parser().parse(statement).unwrap()).collect())
+        });
+    block_parser
+}
+
 pub fn parse_program(input: LexerOutput) -> ast::Program {
     ast::Program(input.0.iter().map(|block| {
-        let statements = block.0.iter().map(|statement| {
-            let parsed_statement = match statement_parser().parse(statement.0.clone()) {
-                Ok(s) => s,
-                Err(_) => panic!("Failed to parse statement")
-            };
-            parsed_statement
-        });
-        ast::Block(statements.collect())
+        let parsed_block = match statement_block_parser().parse(block.0.clone()) {
+            Ok(s) => s,
+            Err(_) => panic!("Failed to parse statement")
+        };
+        parsed_block
     }).collect())
 }
