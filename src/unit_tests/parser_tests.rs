@@ -221,3 +221,20 @@ fn parser_correctly_parses_goto_statement() {
         ]
     )]));
 }
+
+#[test]
+fn parser_correctly_parses_if_statment() {
+    let program = "If Cinderella is better than the prince, then go to heaven.";
+    let lexer_output = preprocessor::preprocess(lexer::lexer().parse(program).unwrap());
+    let ast = parser::parse_program(lexer_output);
+
+    assert_eq!(ast, ast::Program(vec![ast::Block(
+        vec![
+            ast::Statement::IfStatement(
+                ast::Condition::LessThan(ast::VariableOrNumberLiteral("cinderella".to_string()),
+                ast::VariableOrNumberLiteral("prince".to_string())),
+                Box::new(ast::Statement::GotoStatement(ast::VariableOrNumberLiteral("heaven".to_string())))
+            )
+        ]
+    )]));
+}

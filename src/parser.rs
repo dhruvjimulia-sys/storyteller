@@ -122,15 +122,37 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         take_until(keyword("end"))
         .map(|_| ast::Statement::ExitStatement);
 
-    let statement =
-        input_statement
+    fn if_statement(statement_parser: Recursive<'_, LexerToken, ast::Statement, Simple<LexerToken>>) -> impl Parser<LexerToken, ast::Statement, Error = Simple<LexerToken>> + '_ {
+        let comma = just(LexerToken::Comma);
+        let condition =
+            take_until(keyword("is").then(keyword("better")).then(keyword("than")))
+            .then(take_until(end()))
+            .map(|((lhs, _), (rhs, _))| ast::Condition::LessThan(
+                ast::VariableOrNumberLiteral(lexer_tokens_to_name(lhs)),
+                ast::VariableOrNumberLiteral(lexer_tokens_to_name(rhs))
+            ));
+
+        keyword("if")
+        .ignore_then(take_until(comma))
+        .then_ignore(keyword("then"))
+        .then(take_until(end()))
+        .map(move |((condition_tokens, _), (consequence, _))| ast::Statement::IfStatement(
+            condition.parse(condition_tokens).unwrap(),
+            Box::new(statement_parser.parse(consequence).unwrap())
+        ))
+    }
+
+    let statement = recursive(|statement| {
+        if_statement(statement)
+        .or(input_statement)
         .or(print_character_statement)
         .or(print_number_statement)
         .or(assignment_statement)
         .or(addition_statement)
         .or(subtraction_statement)
         .or(goto_statement)
-        .or(exit_statement);
+        .or(exit_statement)
+    });
 
     statement
 }

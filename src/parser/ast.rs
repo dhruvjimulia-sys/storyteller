@@ -10,7 +10,18 @@ pub enum Statement {
     PrintCharacterStatement(Variable),
     InputStatement(Variable),
     ExitStatement,
-    GotoStatement(VariableOrNumberLiteral)
+    GotoStatement(VariableOrNumberLiteral),
+    IfStatement(Condition, Box<Statement>)
+}
+
+#[derive(Debug, PartialEq)]
+pub enum Condition {
+    EqualTo(VariableOrNumberLiteral, VariableOrNumberLiteral),
+    NotEqualTo(VariableOrNumberLiteral, VariableOrNumberLiteral),
+    GreaterThan(VariableOrNumberLiteral, VariableOrNumberLiteral),
+    LessThan(VariableOrNumberLiteral, VariableOrNumberLiteral),
+    GreaterThanOrEqualTo(VariableOrNumberLiteral, VariableOrNumberLiteral),
+    LessThanOrEqualTo(VariableOrNumberLiteral, VariableOrNumberLiteral)
 }
 
 #[derive(Debug, PartialEq)]
