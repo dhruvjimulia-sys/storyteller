@@ -1,11 +1,13 @@
-use chumsky::prelude::*;
+use chumsky::Parser;
 pub mod parser;
+mod lexer_types;
 mod lexer;
 mod preprocessor;
-mod types;
 #[cfg(test)]
 mod unit_tests;
-/*
+mod ast_to_ir;
+
+
 fn main() {
     let file_name = match std::env::args().nth(1) {
         Some(file_name) => file_name,
@@ -21,29 +23,22 @@ fn main() {
             return;
         }
     };
-    match lexer::lexer().parse(file_contents) {
-        Ok(lexer_output) => println!("{:?}", parser::parse_program(lexer_output)),
-        Err(errors) => println!("ParseError {:#?}", errors)
+    let ast = match lexer::lexer().parse(file_contents) {
+        Ok(lexer_output) => parser::parse_program(preprocessor::preprocess(lexer_output)),
+        Err(errors) => {
+            println!("ParseError {:#?}", errors);
+            return;
+        }
+    };
+    let ir = ast_to_ir::convert_ast_to_ir(ast);
+    for instruction in ir {
+        println!("{:?}", instruction);
     }
 }
-*/
 
+
+/*
 fn main() {
-
-    // let test_parser = take_until(just::<char, &str, Simple<char>>("ly").then_ignore(inline_whitespace));
-    // let ascii_chars = filter::<_, _, Simple<char>>(|c: &char| {
-    //     c.is_ascii_alphabetic()
-    // });
-    // let test_parser = ascii_chars.then_ignore(just::<char, &str, Simple<char>>("ly").then_ignore(inline_whitespace));
-
-
-    // let test_parser: Just<LexerToken, LexerToken, Simple<LexerToken>> = just(LexerToken::Text("quick".to_string()));
-
-    /* 
-    fn keyword(keyword: &str) -> Just<LexerToken, LexerToken, Simple<LexerToken>> {
-        just(LexerToken::Text(keyword.to_string()))
-    }
-
     let quote = just(LexerToken::Quote);
     let comma = just(LexerToken::Comma);
     let inner_quote = none_of(vec![LexerToken::Quote]).repeated();
@@ -64,9 +59,20 @@ fn main() {
         LexerToken::Text("a".to_string()),
         LexerToken::Text("wizard".to_string()),
         LexerToken::Quote));
-    */
+
 
     let test_parser = any::<char, Simple<char>>().repeated().separated_by(just(","));
 
     println!("{:?}", test_parser.parse("d,e,f"));
 }
+*/
+
+// fn main() {
+//     println!("{}", ast_to_ir::convert_poetic_literal_to_integer("a".to_string()));
+//     // let result = BigUint::new(vec!(11));
+//     // println!("{}", result.clone().to_string());
+//     // let test = (result.rem(BigUint::new(vec!(10)))).to_u32_digits();
+//     // for digit in test {
+//     //     println!("{}", digit);
+//     // }
+// }

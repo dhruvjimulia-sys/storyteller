@@ -1,4 +1,4 @@
-use crate::types::{LexerOutput, LexerToken, LexerBlock};
+use crate::lexer_types::{LexerOutput, LexerToken, LexerBlock};
 
 fn lowercase_all_tokens(tokens: LexerOutput) -> LexerOutput {
     LexerOutput(tokens.0.into_iter().map(|block| {

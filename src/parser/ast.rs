@@ -1,7 +1,7 @@
 #[derive(Debug, PartialEq)]
 pub struct Program(pub Vec<Block>);
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Statement {
     AssignmentStatement(Variable, VariableOrNumberLiteral),
     AddStatement(Variable, VariableOrNumberLiteral),
@@ -14,7 +14,7 @@ pub enum Statement {
     IfStatement(Condition, Box<Statement>)
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Condition {
     EqualTo(VariableOrNumberLiteral, VariableOrNumberLiteral),
     NotEqualTo(VariableOrNumberLiteral, VariableOrNumberLiteral),
@@ -27,8 +27,8 @@ pub enum Condition {
 #[derive(Debug, PartialEq)]
 pub struct Block(pub Vec<Statement>);
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Variable(pub String);
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct VariableOrNumberLiteral(pub String);

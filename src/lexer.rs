@@ -1,5 +1,5 @@
 use chumsky::prelude::{*, text::Character};
-use crate::types::{LexerOutput, LexerBlock, LexerToken};
+use crate::lexer_types::{LexerOutput, LexerBlock, LexerToken};
 
 pub fn lexer() -> impl Parser<char, LexerOutput, Error = Simple<char>> {
     let inline_whitespace = filter(|c: &char| c.is_inline_whitespace()).repeated();

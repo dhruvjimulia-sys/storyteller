@@ -1,6 +1,6 @@
 use chumsky::prelude::*;
 use chumsky::primitive::Just;
-use crate::types::{LexerOutput, LexerToken};
+use crate::lexer_types::{LexerOutput, LexerToken};
 use std::collections::HashSet;
 pub mod ast;
 
