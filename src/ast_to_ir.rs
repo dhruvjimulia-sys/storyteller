@@ -3,10 +3,9 @@ use std::collections::HashSet;
 use num::{BigUint, Zero};
 use chumsky::prelude::*;
 use std::ops::Rem;
-mod ir;
+pub mod ir;
 
-pub fn convert_ast_to_ir(ast: ast::Program) -> Vec<ir::Instruction> {
-    let variables = get_all_variables(&ast);
+pub fn convert_ast_to_ir(ast: ast::Program, variables: HashSet<ir::Variable>) -> Vec<ir::Instruction> {
     let mut ir: Vec<ir::Instruction> = Vec::new();
     ast.0.iter().enumerate().for_each(|(i, block)| {
         ir.push(ir::Instruction::Label(i.into()));
@@ -70,42 +69,6 @@ fn condition_to_ir(condition: &ast::Condition, variables: &HashSet<ir::Variable>
             ir::Condition::LessThanOrEqualTo(replace_if_poetic_literal(lhs.clone(), &variables), replace_if_poetic_literal(rhs.clone(), &variables))
         }
     }
-}
-
-fn get_all_variables(ast: &ast::Program) -> HashSet<ir::Variable> {
-    let mut variables = HashSet::new();
-    ast.0.iter().for_each(|block| {
-        block.0.iter().for_each(|statement| {
-            match statement {
-                ast::Statement::AssignmentStatement(lhs, _) => {
-                    variables.insert(ir::Variable(lhs.0.clone()));
-                }
-                ast::Statement::AddStatement(lhs, _) => {
-                    variables.insert(ir::Variable(lhs.0.clone()));
-                }
-                ast::Statement::SubStatement(lhs, _) => {
-                    variables.insert(ir::Variable(lhs.0.clone()));
-                }
-                ast::Statement::PrintNumberStatement(variable) => {
-                    variables.insert(ir::Variable(variable.0.clone()));
-                }
-                ast::Statement::PrintCharacterStatement(variable) => {
-                    variables.insert(ir::Variable(variable.0.clone()));
-                }
-                ast::Statement::InputStatement(variable) => {
-                    variables.insert(ir::Variable(variable.0.clone()));
-                }
-                ast::Statement::IfStatement(_, statement) => {
-                    let variables_in_statement = get_all_variables(&ast::Program(vec!(ast::Block(vec!((**statement).clone())))));
-                    for variable in variables_in_statement {
-                        variables.insert(variable);
-                    };
-                }
-                _ => {}
-            }
-        });
-    });
-    variables
 }
 
 fn replace_if_poetic_literal(value: ast::VariableOrNumberLiteral, variables: &HashSet<ir::Variable>) -> ir::Expression {
