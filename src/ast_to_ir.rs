@@ -19,13 +19,13 @@ pub fn convert_ast_to_ir(ast: ast::Program, variables: HashSet<ir::Variable>) ->
 fn statement_to_ir(statement: &ast::Statement, variables: &HashSet<ir::Variable>) -> ir::Instruction {
     match *statement {
         ast::Statement::AssignmentStatement(ref lhs, ref rhs) => {
-            ir::Instruction::AssignmentInstruction(ir::Variable(lhs.0.clone()), replace_if_poetic_literal(rhs.clone(), variables.clone()))
+            ir::Instruction::AssignmentInstruction(ir::Variable(lhs.0.clone()), replace_if_poetic_literal(rhs.clone(), variables))
         }
         ast::Statement::AddStatement(ref lhs, ref rhs) => {
-            ir::Instruction::AddInstruction(ir::Variable(lhs.0.clone()), replace_if_poetic_literal(rhs.clone(), variables.clone()))
+            ir::Instruction::AddInstruction(ir::Variable(lhs.0.clone()), replace_if_poetic_literal(rhs.clone(), variables))
         }
         ast::Statement::SubStatement(ref lhs, ref rhs) => {
-            ir::Instruction::SubInstruction(ir::Variable(lhs.0.clone()), replace_if_poetic_literal(rhs.clone(), variables.clone()))
+            ir::Instruction::SubInstruction(ir::Variable(lhs.0.clone()), replace_if_poetic_literal(rhs.clone(), variables))
         }
         ast::Statement::PrintNumberStatement(ref variable) => {
             ir::Instruction::PrintNumberInstruction(ir::Variable(variable.0.clone()))
@@ -40,10 +40,10 @@ fn statement_to_ir(statement: &ast::Statement, variables: &HashSet<ir::Variable>
             ir::Instruction::ExitInstruction
         }
         ast::Statement::GotoStatement(ref label) => {
-            ir::Instruction::GotoInstruction(replace_if_poetic_literal(label.clone(), variables.clone()))
+            ir::Instruction::GotoInstruction(replace_if_poetic_literal(label.clone(), variables))
         }
         ast::Statement::IfStatement(ref condition, ref statement) => {
-            ir::Instruction::IfInstruction(condition_to_ir(condition, variables.clone()), Box::new(statement_to_ir(statement, variables)))
+            ir::Instruction::IfInstruction(condition_to_ir(condition, variables), Box::new(statement_to_ir(statement, variables)))
         }
     }
 }

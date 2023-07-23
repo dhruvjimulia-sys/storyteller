@@ -7,7 +7,7 @@ mod preprocessor;
 mod unit_tests;
 mod ast_to_ir;
 mod variable_extractor;
-
+mod interpreter;
 
 fn main() {
     let file_name = match std::env::args().nth(1) {
@@ -33,9 +33,8 @@ fn main() {
     };
     let variables = variable_extractor::get_variables(&ast);
     let ir = ast_to_ir::convert_ast_to_ir(ast, variables);
-    for instruction in ir {
-        println!("{:?}", instruction);
-    }
+    // println!("{:?}", ir);
+    interpreter::interpret(ir);
 }
 
 

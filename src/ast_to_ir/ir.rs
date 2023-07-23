@@ -1,12 +1,12 @@
 use num::BigUint;
 
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum Expression {
     NumberLiteral(BigUint),
     Variable(String)
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Instruction {
     AssignmentInstruction(Variable, Expression),
     AddInstruction(Variable, Expression),
@@ -20,10 +20,10 @@ pub enum Instruction {
     Label(BigUint)
 }
 
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub struct Variable(pub String);
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Condition {
     EqualTo(Expression, Expression),
     NotEqualTo(Expression, Expression),
