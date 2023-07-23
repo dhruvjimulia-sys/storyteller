@@ -33,7 +33,6 @@ fn main() {
     };
     let variables = variable_extractor::get_variables(&ast);
     let ir = ast_to_ir::convert_ast_to_ir(ast, variables);
-    // println!("{:?}", ir);
     interpreter::interpret(ir);
 }
 

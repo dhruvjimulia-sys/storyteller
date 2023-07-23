@@ -127,10 +127,18 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         let condition =
             take_until(keyword("is").then(keyword("better")).then(keyword("than")))
             .then(take_until(end()))
-            .map(|((lhs, _), (rhs, _))| ast::Condition::LessThan(
+            .map(|((lhs, _), (rhs, _))| ast::Condition::GreaterThan(
                 ast::VariableOrNumberLiteral(lexer_tokens_to_name(lhs)),
                 ast::VariableOrNumberLiteral(lexer_tokens_to_name(rhs))
-            ));
+            ))
+            .or(
+                take_until(keyword("is").then(keyword("worse")).then(keyword("than")))
+                .then(take_until(end()))
+                .map(|((lhs, _), (rhs, _))| ast::Condition::LessThan(
+                    ast::VariableOrNumberLiteral(lexer_tokens_to_name(lhs)),
+                    ast::VariableOrNumberLiteral(lexer_tokens_to_name(rhs))
+                ))
+            );
 
         keyword("if")
         .ignore_then(take_until(comma))
