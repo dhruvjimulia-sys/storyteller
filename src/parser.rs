@@ -171,9 +171,12 @@ fn statement_block_parser() -> impl Parser<LexerToken, ast::Block, Error = Simpl
         .or(just(LexerToken::ExclamationMark));
 
     let block_parser =
-        sentence_end_punctuation.clone().not().repeated()
-        .separated_by(sentence_end_punctuation)
-        .allow_trailing()
+        (sentence_end_punctuation.clone().not().repeated()
+            .then_ignore(sentence_end_punctuation)
+        ).repeated().at_least(1)
+        .or(
+            end().map(|_| vec!())
+        )
         .map(|statements| {
             ast::Block(statements.into_iter()
             .filter(|statement| !statement.is_empty())
@@ -183,7 +186,7 @@ fn statement_block_parser() -> impl Parser<LexerToken, ast::Block, Error = Simpl
 }
 
 pub fn parse_program(input: LexerOutput) -> ast::Program {
-    ast::Program(input.0.iter().map(|block| {
+    ast::Program(input.0.into_iter().map(|block| {
         let parsed_block = match statement_block_parser().parse(block.0.clone()) {
             Ok(s) => s,
             Err(_) => panic!("Failed to parse statement")
