@@ -11,7 +11,8 @@ pub fn lexer() -> impl Parser<char, LexerOutput, Error = Simple<char>> {
         .or(just("\"").map(|_| LexerToken::Quote))
         .or(just(".").map(|_| LexerToken::Period))
         .or(just("?").map(|_| LexerToken::QuestionMark))
-        .or(just("!").map(|_| LexerToken::ExclamationMark));
+        .or(just("!").map(|_| LexerToken::ExclamationMark))
+        .or(filter(|c: &char| !c.is_whitespace()).map(|_| LexerToken::Unknown));
 
     let block = 
         newline.not().rewind()
