@@ -1,6 +1,6 @@
 Charlie was great.
 
-"I am a wizard," Charlie said.
+"I'm a wizard," Charlie said.
 
 Charlie felt as good as a wizard.
 

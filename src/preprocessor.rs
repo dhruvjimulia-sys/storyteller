@@ -11,7 +11,7 @@ fn lowercase_all_tokens(tokens: LexerOutput) -> LexerOutput {
     }).collect::<Vec<_>>())
 }
 
-fn remove_end_sentence_punctuation_in_quotes(tokens: LexerOutput) -> LexerOutput {
+fn remove_end_sentence_and_unknown_punctuation_in_quotes(tokens: LexerOutput) -> LexerOutput {
     LexerOutput(tokens.0.into_iter().map(|block| {
         let mut in_quote = false;
         let mut updated_block = vec!();
@@ -21,7 +21,7 @@ fn remove_end_sentence_punctuation_in_quotes(tokens: LexerOutput) -> LexerOutput
                     in_quote = !in_quote;
                     updated_block.push(token);
                 },
-                LexerToken::Period | LexerToken::QuestionMark | LexerToken::ExclamationMark => {
+                LexerToken::Period | LexerToken::QuestionMark | LexerToken::ExclamationMark | LexerToken::Unknown => {
                     if !in_quote {
                         updated_block.push(token);
                     }
@@ -34,5 +34,5 @@ fn remove_end_sentence_punctuation_in_quotes(tokens: LexerOutput) -> LexerOutput
 }
 
 pub fn preprocess(tokens: LexerOutput) -> LexerOutput {
-    remove_end_sentence_punctuation_in_quotes(lowercase_all_tokens(tokens))
+    remove_end_sentence_and_unknown_punctuation_in_quotes(lowercase_all_tokens(tokens))
 }

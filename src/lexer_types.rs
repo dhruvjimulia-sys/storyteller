@@ -11,5 +11,6 @@ pub enum LexerToken {
     Period,
     QuestionMark,
     ExclamationMark,
-    Text(String)
+    Text(String),
+    Unknown
 }
