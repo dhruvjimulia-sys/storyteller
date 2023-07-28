@@ -5,7 +5,6 @@ mod preprocessor;
 #[cfg(test)]
 mod unit_tests;
 mod ast_to_ir;
-mod variable_extractor;
 mod interpreter;
 
 fn main() {
@@ -30,8 +29,7 @@ fn main() {
             return;
         }
     };
-    let variables = variable_extractor::get_variables(&ast);
-    let ir = ast_to_ir::convert_ast_to_ir(ast, variables);
+    let ir = ast_to_ir::convert_ast_to_ir(ast);
     interpreter::interpret(ir);
 }
 

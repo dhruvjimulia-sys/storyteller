@@ -4,8 +4,11 @@ use num::{BigUint, Zero};
 use chumsky::prelude::*;
 use std::ops::Rem;
 pub mod ir;
+mod variable_extractor;
 
-pub fn convert_ast_to_ir(ast: ast::Program, variables: HashSet<ir::Variable>) -> Vec<ir::Instruction> {
+pub fn convert_ast_to_ir(ast: ast::Program) -> Vec<ir::Instruction> {
+    let variables = variable_extractor::get_variables(&ast);
+
     let mut ir: Vec<ir::Instruction> = Vec::new();
     ast.0.iter().enumerate().for_each(|(i, block)| {
         ir.push(ir::Instruction::Label(i.into()));
