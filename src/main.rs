@@ -1,6 +1,5 @@
 use chumsky::Parser;
 pub mod parser;
-mod lexer_types;
 mod lexer;
 mod preprocessor;
 #[cfg(test)]
