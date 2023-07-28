@@ -10,40 +10,53 @@ pub fn convert_ast_to_ir(ast: ast::Program, variables: HashSet<ir::Variable>) ->
     ast.0.iter().enumerate().for_each(|(i, block)| {
         ir.push(ir::Instruction::Label(i.into()));
         block.0.iter().for_each(|statement| {
-            ir.push(statement_to_ir(statement, &variables));
+            match statement_to_ir(statement, &variables) {
+                Some(instruction) => ir.push(instruction),
+                None => {}
+            }
         })
     });
     ir
 }
 
-fn statement_to_ir(statement: &ast::Statement, variables: &HashSet<ir::Variable>) -> ir::Instruction {
+fn statement_to_ir(statement: &ast::Statement, variables: &HashSet<ir::Variable>) -> Option<ir::Instruction> {
     match *statement {
         ast::Statement::AssignmentStatement(ref lhs, ref rhs) => {
-            ir::Instruction::AssignmentInstruction(ir::Variable(lhs.0.clone()), replace_if_poetic_literal(rhs.clone(), variables))
+            Some(ir::Instruction::AssignmentInstruction(ir::Variable(lhs.0.clone()), replace_if_poetic_literal(rhs.clone(), variables)))
         }
         ast::Statement::AddStatement(ref lhs, ref rhs) => {
-            ir::Instruction::AddInstruction(ir::Variable(lhs.0.clone()), replace_if_poetic_literal(rhs.clone(), variables))
+            Some(ir::Instruction::AddInstruction(ir::Variable(lhs.0.clone()), replace_if_poetic_literal(rhs.clone(), variables)))
         }
         ast::Statement::SubStatement(ref lhs, ref rhs) => {
-            ir::Instruction::SubInstruction(ir::Variable(lhs.0.clone()), replace_if_poetic_literal(rhs.clone(), variables))
+            Some(ir::Instruction::SubInstruction(ir::Variable(lhs.0.clone()), replace_if_poetic_literal(rhs.clone(), variables)))
         }
         ast::Statement::PrintNumberStatement(ref variable) => {
-            ir::Instruction::PrintNumberInstruction(ir::Variable(variable.0.clone()))
+            Some(ir::Instruction::PrintNumberInstruction(ir::Variable(variable.0.clone())))
         }
         ast::Statement::PrintCharacterStatement(ref variable) => {
-            ir::Instruction::PrintCharacterInstruction(ir::Variable(variable.0.clone()))
+            Some(ir::Instruction::PrintCharacterInstruction(ir::Variable(variable.0.clone())))
         }
         ast::Statement::InputStatement(ref variable) => {
-            ir::Instruction::InputInstruction(ir::Variable(variable.0.clone()))
+            Some(ir::Instruction::InputInstruction(ir::Variable(variable.0.clone())))
         }
         ast::Statement::ExitStatement => {
-            ir::Instruction::ExitInstruction
+            Some(ir::Instruction::ExitInstruction)
         }
         ast::Statement::GotoStatement(ref label) => {
-            ir::Instruction::GotoInstruction(replace_if_poetic_literal(label.clone(), variables))
+            Some(ir::Instruction::GotoInstruction(replace_if_poetic_literal(label.clone(), variables)))
         }
         ast::Statement::IfStatement(ref condition, ref statement) => {
-            ir::Instruction::IfInstruction(condition_to_ir(condition, variables), Box::new(statement_to_ir(statement, variables)))
+            match statement_to_ir(statement, variables) {
+                Some(inner_statement) => {
+                    Some(ir::Instruction::IfInstruction(condition_to_ir(condition, variables), Box::new(inner_statement)))
+                }
+                None => {
+                    None
+                }
+            }
+        }
+        ast::Statement::Comment => {
+            None
         }
     }
 }

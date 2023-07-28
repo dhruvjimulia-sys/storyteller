@@ -11,7 +11,8 @@ pub enum Statement {
     InputStatement(Variable),
     ExitStatement,
     GotoStatement(VariableOrNumberLiteral),
-    IfStatement(Condition, Box<Statement>)
+    IfStatement(Condition, Box<Statement>),
+    Comment
 }
 
 #[derive(Debug, PartialEq, Clone)]

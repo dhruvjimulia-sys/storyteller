@@ -122,6 +122,10 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         take_until(keyword("end"))
         .map(|_| ast::Statement::ExitStatement);
 
+    let comment =
+        take_until(end())
+        .map(|_| ast::Statement::Comment);
+
     fn if_statement(statement_parser: Recursive<'_, LexerToken, ast::Statement, Simple<LexerToken>>) -> impl Parser<LexerToken, ast::Statement, Error = Simple<LexerToken>> + '_ {
         let comma = just(LexerToken::Comma);
         let condition =
@@ -160,6 +164,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         .or(subtraction_statement)
         .or(goto_statement)
         .or(exit_statement)
+        .or(comment)
     });
 
     statement
