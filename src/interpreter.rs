@@ -30,9 +30,24 @@ fn get_expression_value(expression: &ir::Expression, variable_values: &mut HashM
     }
 }
 
-fn big_uint_to_ascii(value: BigUint) -> char {
-    let result = value.rem(128u8).to_u32_digits();
-    ((if result.len() == 0 { 0 } else { result[0] }) as u8) as char
+fn number_to_string(value: BigUint) -> String {
+    // e.g. 123124125 -> "abc"
+    let mut result = String::new();
+    let mut value = value;
+    while value > 0u8.into() {
+        let remainder = value.clone().rem(1000u32);
+        result.push((remainder.to_u32_digits()[0] as u8) as char);
+        value = value / 1000u32;
+    }
+    result.chars().rev().collect()
+}
+
+fn string_to_number(input: &str) -> BigUint {
+    let mut result = BigUint::from(0u8);
+    for c in input.chars() {
+        result = result * 1000u16 + c as u8;
+    }
+    result
 }
 
 fn evaluate_condition(condition: &ir::Condition, variable_values: &mut HashMap<Variable, BigUint>) -> bool {
@@ -91,13 +106,16 @@ fn interpret_instruction(ir: &Vec<ir::Instruction>, instruction: &ir::Instructio
             print!("{}", get_variable_value(variable.clone(), variable_values));
         }
         ir::Instruction::PrintCharacterInstruction(variable) => {
-            print!("{}", big_uint_to_ascii(get_variable_value(variable.clone(), variable_values)));
+            print!("{}", number_to_string(get_variable_value(variable.clone(), variable_values)));
         }
         ir::Instruction::InputInstruction(variable) => {
             let mut input = String::new();
-            std::io::stdin().read_line(&mut input).unwrap();
-            let input = input.trim().parse::<u8>().unwrap();
-            variable_values.insert(variable.clone(), input.into());
+            match std::io::stdin().read_line(&mut input) {
+                Ok(_) => {}
+                Err(error) => panic!("InputError: {}", error)
+            }
+            let input = string_to_number(input.trim());
+            variable_values.insert(variable.clone(), input);
         }
         ir::Instruction::ExitInstruction => {
             return;
