@@ -231,7 +231,7 @@ fn parser_correctly_parses_if_statment() {
     assert_eq!(ast, ast::Program(vec![ast::Block(
         vec![
             ast::Statement::IfStatement(
-                ast::Condition::LessThan(ast::VariableOrNumberLiteral("cinderella".to_string()),
+                ast::Condition::GreaterThan(ast::VariableOrNumberLiteral("cinderella".to_string()),
                 ast::VariableOrNumberLiteral("prince".to_string())),
                 Box::new(ast::Statement::GotoStatement(ast::VariableOrNumberLiteral("heaven".to_string())))
             )
