@@ -1,4 +1,5 @@
 use chumsky::Parser;
+use std::io::Write;
 pub mod parser;
 mod lexer;
 mod preprocessor;
@@ -7,7 +8,7 @@ mod unit_tests;
 mod ast_to_ir;
 mod interpreter;
 
-pub fn interpret(file_name: String) {
+pub fn interpret(file_name: String, input_stream: &mut dyn std::io::BufRead, output_stream: &mut dyn Write) {
     let file_contents = match std::fs::read_to_string(file_name) {
         Ok(file_contents) => file_contents,
         Err(e) => {
@@ -23,5 +24,5 @@ pub fn interpret(file_name: String) {
         }
     };
     let ir = ast_to_ir::convert_ast_to_ir(ast);
-    interpreter::interpret(ir);
+    interpreter::interpret(ir, input_stream, output_stream);
 }

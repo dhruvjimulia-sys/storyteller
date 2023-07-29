@@ -6,5 +6,5 @@ fn main() {
             return;
         }
     };
-    storyteller::interpret(file_name);
+    storyteller::interpret(file_name,  &mut std::io::stdin().lock(), &mut std::io::stdout());
 }

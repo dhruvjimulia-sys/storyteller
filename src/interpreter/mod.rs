@@ -1,7 +1,8 @@
 use num::BigUint;
-use crate::ast_to_ir::ir::{Variable, self};
+use std::io::{Write, BufRead};
 use std::collections::HashMap;
 use std::ops::Rem;
+use crate::ast_to_ir::ir::{Variable, self};
 
 fn get_labels(ir: &Vec<ir::Instruction>) -> HashMap<BigUint, usize> {
     let mut labels = HashMap::new();
@@ -73,22 +74,22 @@ fn evaluate_condition(condition: &ir::Condition, variable_values: &mut HashMap<V
     }
 }
 
-pub fn interpret(ir: Vec<ir::Instruction>) {
+pub fn interpret(ir: Vec<ir::Instruction>, input_stream: &mut dyn std::io::BufRead, output_stream: &mut dyn std::io::Write) {
     let mut variable_values: HashMap<Variable, BigUint> = HashMap::new();
     let labels = get_labels(&ir);
     let instruction_pointer = 0;
-    interpret_helper(&ir, &mut variable_values, &labels, instruction_pointer);
+    interpret_helper(&ir, &mut variable_values, &labels, instruction_pointer, input_stream, output_stream);
 }
 
-fn interpret_helper(ir: &Vec<ir::Instruction>, variable_values: &mut HashMap<Variable, BigUint>, labels: &HashMap<BigUint, usize>, instruction_pointer: usize) {
+fn interpret_helper(ir: &Vec<ir::Instruction>, variable_values: &mut HashMap<Variable, BigUint>, labels: &HashMap<BigUint, usize>, instruction_pointer: usize, input_stream: &mut dyn BufRead, output_stream: &mut dyn Write) {
     let instruction = match ir.get(instruction_pointer) {
         Some(instruction) => instruction,
         None => return
     };
-    interpret_instruction(ir, instruction, variable_values, labels, instruction_pointer);
+    interpret_instruction(ir, instruction, variable_values, labels, instruction_pointer, input_stream, output_stream);
 }
 
-fn interpret_instruction(ir: &Vec<ir::Instruction>, instruction: &ir::Instruction, variable_values: &mut HashMap<Variable, BigUint>, labels: &HashMap<BigUint, usize>, instruction_pointer: usize) {
+fn interpret_instruction(ir: &Vec<ir::Instruction>, instruction: &ir::Instruction, variable_values: &mut HashMap<Variable, BigUint>, labels: &HashMap<BigUint, usize>, instruction_pointer: usize, input_stream:&mut dyn BufRead, output_stream: &mut dyn Write) {
     match instruction {
         ir::Instruction::AssignmentInstruction(variable, expression) => {
             let expr_value = get_expression_value(expression, variable_values);
@@ -103,19 +104,22 @@ fn interpret_instruction(ir: &Vec<ir::Instruction>, instruction: &ir::Instructio
             variable_values.insert(variable.clone(), new_value);
         }
         ir::Instruction::PrintNumberInstruction(variable) => {
-            print!("{}", get_variable_value(variable.clone(), variable_values));
+            match write!(output_stream, "{}", get_variable_value(variable.clone(), variable_values)) {
+                Ok(_) => {}
+                Err(error) => panic!("OutputError: {}", error)
+            };
         }
         ir::Instruction::PrintCharacterInstruction(variable) => {
             print!("{}", number_to_string(get_variable_value(variable.clone(), variable_values)));
         }
         ir::Instruction::InputInstruction(variable) => {
             let mut input = String::new();
-            match std::io::stdin().read_line(&mut input) {
-                Ok(_) => {}
+            match input_stream.read_line(&mut input) {
+                Ok(_) => {},
                 Err(error) => panic!("InputError: {}", error)
-            }
-            let input = string_to_number(input.trim());
-            variable_values.insert(variable.clone(), input);
+            };
+            let num_input = string_to_number(input.trim());
+            variable_values.insert(variable.clone(), num_input);
         }
         ir::Instruction::ExitInstruction => {
             return;
@@ -127,15 +131,15 @@ fn interpret_instruction(ir: &Vec<ir::Instruction>, instruction: &ir::Instructio
                 Some(value) => *value,
                 None => panic!("Label not found")
             };
-            interpret_helper(ir, variable_values, labels, new_instruction_pointer);
+            interpret_helper(ir, variable_values, labels, new_instruction_pointer, input_stream, output_stream);
             return;
         }
         ir::Instruction::IfInstruction(condition, statement) => {
             if evaluate_condition(condition, variable_values) {
-                interpret_instruction(ir, statement, variable_values, labels, instruction_pointer);
+                interpret_instruction(ir, statement, variable_values, labels, instruction_pointer, input_stream, output_stream);
             }
         }
         ir::Instruction::Label(_) => {}
     }
-    interpret_helper(&ir, variable_values, labels, instruction_pointer + 1);
+    interpret_helper(&ir, variable_values, labels, instruction_pointer + 1, input_stream, output_stream);
 }
