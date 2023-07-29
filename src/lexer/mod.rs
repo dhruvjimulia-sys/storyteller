@@ -22,6 +22,7 @@ pub fn lexer() -> impl Parser<char, LexerOutput, Error = Simple<char>> {
 
     let lexer_program = block.separated_by(newline.repeated().at_least(1))
         .allow_trailing()
+        .allow_leading()
         .then_ignore(end())
         .map(|blocks| LexerOutput(blocks));
 
