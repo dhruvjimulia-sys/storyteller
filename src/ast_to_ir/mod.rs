@@ -102,7 +102,7 @@ fn replace_if_poetic_literal(value: ast::VariableOrNumberLiteral, variables: &Ha
 pub fn convert_poetic_literal_to_integer(poetic_literal: String) -> BigUint {
     fn convert_poetic_string_to_digit(poetic_string: String) -> u8 {
         let mut result: BigUint = Zero::zero();
-        for c in poetic_string.chars() {
+        for c in poetic_string.to_lowercase().chars() {
             result += (c as u8) - ('a' as u8) + 1
         }
        let result_digits = (result.rem(BigUint::new(vec!(10)))).to_u32_digits();
