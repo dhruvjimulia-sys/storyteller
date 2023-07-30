@@ -110,7 +110,10 @@ fn interpret_instruction(ir: &Vec<ir::Instruction>, instruction: &ir::Instructio
             };
         }
         ir::Instruction::PrintCharacterInstruction(variable) => {
-            print!("{}", number_to_string(get_variable_value(variable.clone(), variable_values)));
+            match write!(output_stream, "{}", number_to_string(get_variable_value(variable.clone(), variable_values))) {
+                Ok(_) => {}
+                Err(error) => panic!("OutputError: {}", error)
+            };
         }
         ir::Instruction::InputInstruction(variable) => {
             let mut input = String::new();
