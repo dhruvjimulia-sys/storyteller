@@ -5,6 +5,20 @@ use std::collections::HashSet;
 pub mod ast;
 
 fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<LexerToken>> {
+    let to_be = keyword("was")
+        .or(keyword("were"))
+        .or(keyword("is"))
+        .or(keyword("are"));
+    let positive_adjective = keyword("good");
+    let negative_adjective = keyword("bad");
+    let said_keyword = keyword("said");
+    let goto_keywords =
+        keyword("go").then(keyword("to"))
+        .or(keyword("goes").then(keyword("to")))
+        .or(keyword("went").then(keyword("to")))
+        .or(keyword("gone").then(keyword("to")))
+        .or(keyword("going").then(keyword("to")));
+    
     fn keyword(keyword: &str) -> Just<LexerToken, LexerToken, Simple<LexerToken>> {
         just(LexerToken::Text(keyword.to_string()))
     }
@@ -23,14 +37,6 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         }).collect::<Vec<_>>().join(" ")
     }
 
-    let to_be = keyword("was")
-        .or(keyword("were"))
-        .or(keyword("is"))
-        .or(keyword("are"));
-
-    let positive_adjective = keyword("good");
-    let negative_adjective = keyword("bad");
-    let said_keyword = keyword("said");
     let adverb_keyword = filter(|token: &LexerToken| match token {
         LexerToken::Text(s) => s.ends_with("ly"),
         _ => false
@@ -107,13 +113,6 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         .map(|(name, _)| ast::Statement::InputStatement(
             ast::Variable(lexer_tokens_to_name(name))
         ));
-
-    let goto_keywords =
-        keyword("go").then(keyword("to"))
-        .or(keyword("goes").then(keyword("to")))
-        .or(keyword("went").then(keyword("to")))
-        .or(keyword("gone").then(keyword("to")))
-        .or(keyword("going").then(keyword("to")));
 
     let goto_statement =
         take_until(goto_keywords)
