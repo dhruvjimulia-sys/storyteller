@@ -38,8 +38,12 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
 
     let assignment_statement =
         take_until(to_be)
-        .then(take_until(end()))
-        .map(|((a, _), (b, _))| ast::Statement::AssignmentStatement(
+        .then(filter(|token| match token {
+            LexerToken::Text(_) => true,
+            _ => false
+        }).repeated())
+        .then_ignore(end())
+        .map(|((a, _), b)| ast::Statement::AssignmentStatement(
             ast::Variable(lexer_tokens_to_name(a)),
             ast::VariableOrNumberLiteral(lexer_tokens_to_name(b))
         ));
