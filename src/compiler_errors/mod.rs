@@ -25,3 +25,8 @@ pub const IO_ERROR: CompilerError = CompilerError {
     error_type: "GrammarError",
     error_message: "Grammar Error"
 };
+
+pub const ILLEGAL_ARGUMENT_ERROR: CompilerError = CompilerError {
+    error_type: "IllegalArgumentError",
+    error_message: "Illegal Argument Error"
+};

@@ -1,13 +1,13 @@
 use chumsky::Parser;
 use std::io::Write;
-pub mod parser;
+mod parser;
 mod lexer;
 mod preprocessor;
 mod unit_tests;
 mod ast_to_ir;
 mod interpreter;
 #[macro_use]
-mod compiler_errors;
+pub mod compiler_errors;
 use crate::compiler_errors::Error;
 
 pub fn interpret(file_name: String, input_stream: &mut dyn std::io::BufRead, output_stream: &mut dyn Write) {
