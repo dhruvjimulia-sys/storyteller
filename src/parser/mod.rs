@@ -1,14 +1,12 @@
 use chumsky::prelude::*;
 use chumsky::primitive::Just;
 use crate::lexer::lexer_types::{LexerOutput, LexerToken};
+use crate::compiler_errors::{GRAMMAR_ERROR, CompilerError};
 use std::collections::HashSet;
 pub mod ast;
 
 fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<LexerToken>> {
-    let to_be = keyword("was")
-        .or(keyword("were"))
-        .or(keyword("is"))
-        .or(keyword("are"));
+    let to_be = keyword("was").or(keyword("were")).or(keyword("is")).or(keyword("are"));
     let positive_adjective = keyword("good");
     let negative_adjective = keyword("bad");
     let said_keyword = keyword("said");
@@ -197,13 +195,13 @@ fn statement_block_parser() -> impl Parser<LexerToken, ast::Block, Error = Simpl
     block_parser
 }
 
-pub fn parse_program(input: LexerOutput) -> Result<ast::Program, Vec<String>> {
+pub fn parse_program(input: LexerOutput) -> Result<ast::Program, Vec<CompilerError<'static>>> {
     let mut errors = vec![];
     let program = ast::Program(input.0.into_iter().map(|block| {
         let parsed_block = match statement_block_parser().parse(block.0.clone()) {
             Ok(s) => s,
             Err(_) =>  {
-                errors.push(format!("Error parsing block: {:?}", block.0));
+                errors.push(GRAMMAR_ERROR);
                 ast::Block(vec!())
             }
         };
