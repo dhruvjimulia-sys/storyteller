@@ -130,16 +130,20 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         .map(|_| ast::Statement::Comment);
 
     fn if_statement(statement_parser: Recursive<'_, LexerToken, ast::Statement, Simple<LexerToken>>) -> impl Parser<LexerToken, ast::Statement, Error = Simple<LexerToken>> + '_ {
+        let positive_comparative_adjective =
+            keyword("better").or(keyword("greater")).or(keyword("more"));
+        let negative_comparative_adjective =
+            keyword("worse").or(keyword("less"));
         let comma = just(LexerToken::Comma);
         let condition =
-            take_until(keyword("is").then(keyword("better")).then(keyword("than")))
+            take_until(keyword("is").then(positive_comparative_adjective).then(keyword("than")))
             .then(take_until(end()))
             .map(|((lhs, _), (rhs, _))| ast::Condition::GreaterThan(
                 ast::VariableOrNumberLiteral(lexer_tokens_to_name(lhs)),
                 ast::VariableOrNumberLiteral(lexer_tokens_to_name(rhs))
             ))
             .or(
-                take_until(keyword("is").then(keyword("worse")).then(keyword("than")))
+                take_until(keyword("is").then(negative_comparative_adjective).then(keyword("than")))
                 .then(take_until(end()))
                 .map(|((lhs, _), (rhs, _))| ast::Condition::LessThan(
                     ast::VariableOrNumberLiteral(lexer_tokens_to_name(lhs)),
@@ -193,12 +197,21 @@ fn statement_block_parser() -> impl Parser<LexerToken, ast::Block, Error = Simpl
     block_parser
 }
 
-pub fn parse_program(input: LexerOutput) -> ast::Program {
-    ast::Program(input.0.into_iter().map(|block| {
+pub fn parse_program(input: LexerOutput) -> Result<ast::Program, Vec<String>> {
+    let mut errors = vec![];
+    let program = ast::Program(input.0.into_iter().map(|block| {
         let parsed_block = match statement_block_parser().parse(block.0.clone()) {
             Ok(s) => s,
-            Err(_) => panic!("Failed to parse statement")
+            Err(_) =>  {
+                errors.push(format!("Error parsing block: {:?}", block.0));
+                ast::Block(vec!())
+            }
         };
         parsed_block
-    }).collect())
+    }).collect());
+    if errors.is_empty() {
+        Ok(program)
+    } else {
+        Err(errors)
+    }
 }

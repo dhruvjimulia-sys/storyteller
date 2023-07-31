@@ -16,8 +16,9 @@ pub fn interpret(file_name: String, input_stream: &mut dyn std::io::BufRead, out
             return;
         }
     };
-    let ast = match lexer::lexer().parse(file_contents) {
-        Ok(lexer_output) => parser::parse_program(preprocessor::preprocess(lexer_output)),
+    let lexer_output = lexer::lexer().parse(file_contents).expect("Lexer Error");
+    let ast = match parser::parse_program(preprocessor::preprocess(lexer_output)) {
+        Ok(ast) => ast,
         Err(errors) => {
             println!("ParseError {:#?}", errors);
             return;

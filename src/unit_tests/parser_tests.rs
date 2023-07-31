@@ -10,14 +10,14 @@ fn parser_correctly_parses_assignment_statement_with_was() {
     let lexer_output = preprocessor::preprocess(lexer::lexer().parse(program).unwrap());
     let ast = parser::parse_program(lexer_output);
 
-    assert_eq!(ast, ast::Program(vec![ast::Block(
+    assert_eq!(ast, Ok(ast::Program(vec![ast::Block(
         vec![
             ast::Statement::AssignmentStatement(
                 ast::Variable("charlie".to_string()),
                 ast::VariableOrNumberLiteral("wizard".to_string())
             )
         ]
-    )]));
+    )])));
 }
 
 #[test] 
@@ -26,14 +26,14 @@ fn parser_correctly_parses_assignment_statement_with_were() {
     let lexer_output = preprocessor::preprocess(lexer::lexer().parse(program).unwrap());
     let ast = parser::parse_program(lexer_output);
 
-    assert_eq!(ast, ast::Program(vec![ast::Block(
+    assert_eq!(ast, Ok(ast::Program(vec![ast::Block(
         vec![
             ast::Statement::AssignmentStatement(
                 ast::Variable("dog and cat".to_string()),
                 ast::VariableOrNumberLiteral("great company".to_string())
             )
         ]
-    )]));
+    )])));
 }
 
 #[test] 
@@ -42,14 +42,14 @@ fn parser_correctly_parses_assignment_statement_with_is() {
     let lexer_output = preprocessor::preprocess(lexer::lexer().parse(program).unwrap());
     let ast = parser::parse_program(lexer_output);
 
-    assert_eq!(ast, ast::Program(vec![ast::Block(
+    assert_eq!(ast, Ok(ast::Program(vec![ast::Block(
         vec![
             ast::Statement::AssignmentStatement(
                 ast::Variable("ron".to_string()),
                 ast::VariableOrNumberLiteral("here".to_string())
             )
         ]
-    )]));
+    )])));
 }
 
 #[test] 
@@ -58,14 +58,14 @@ fn parser_correctly_parses_assignment_statement_with_are() {
     let lexer_output = preprocessor::preprocess(lexer::lexer().parse(program).unwrap());
     let ast = parser::parse_program(lexer_output);
 
-    assert_eq!(ast, ast::Program(vec![ast::Block(
+    assert_eq!(ast, Ok(ast::Program(vec![ast::Block(
         vec![
             ast::Statement::AssignmentStatement(
                 ast::Variable("percy and annabeth".to_string()),
                 ast::VariableOrNumberLiteral("here".to_string())
             )
         ]
-    )]));
+    )])));
 }
 
 #[test]
@@ -74,14 +74,14 @@ fn parser_correctly_parses_add_statement() {
     let lexer_output = preprocessor::preprocess(lexer::lexer().parse(program).unwrap());
     let ast = parser::parse_program(lexer_output);
 
-    assert_eq!(ast, ast::Program(vec![ast::Block(
+    assert_eq!(ast, Ok(ast::Program(vec![ast::Block(
         vec![
             ast::Statement::AddStatement(
                 ast::Variable("percy".to_string()),
                 ast::VariableOrNumberLiteral("friend".to_string())
             )
         ]
-    )]));
+    )])));
 }
 
 #[test]
@@ -90,14 +90,14 @@ fn parser_correctly_parses_sub_statement() {
     let lexer_output = preprocessor::preprocess(lexer::lexer().parse(program).unwrap());
     let ast = parser::parse_program(lexer_output);
 
-    assert_eq!(ast, ast::Program(vec![ast::Block(
+    assert_eq!(ast, Ok(ast::Program(vec![ast::Block(
         vec![
             ast::Statement::SubStatement(
                 ast::Variable("macbeth".to_string()),
                 ast::VariableOrNumberLiteral("rain".to_string())
             )
         ]
-    )]));
+    )])));
 }
 
 #[test]
@@ -106,13 +106,13 @@ fn parser_correctly_parses_print_number_statement() {
     let lexer_output = preprocessor::preprocess(lexer::lexer().parse(program).unwrap());
     let ast = parser::parse_program(lexer_output);
 
-    assert_eq!(ast, ast::Program(vec![ast::Block(
+    assert_eq!(ast, Ok(ast::Program(vec![ast::Block(
         vec![
             ast::Statement::PrintNumberStatement(
                 ast::Variable("charlie".to_string())
             )
         ]
-    )]));
+    )])));
 }
 
 #[test]
@@ -121,13 +121,13 @@ fn parser_correctly_parses_print_character_statement() {
     let lexer_output = preprocessor::preprocess(lexer::lexer().parse(program).unwrap());
     let ast = parser::parse_program(lexer_output);
 
-    assert_eq!(ast, ast::Program(vec![ast::Block(
+    assert_eq!(ast, Ok(ast::Program(vec![ast::Block(
         vec![
             ast::Statement::PrintCharacterStatement(
                 ast::Variable("charlie".to_string())
             )
         ]
-    )]));
+    )])));
 }
 
 #[test]
@@ -136,7 +136,7 @@ fn parser_correctly_parses_statements_that_end_in_exclamation_marks() {
     let lexer_output = preprocessor::preprocess(lexer::lexer().parse(program).unwrap());
     let ast = parser::parse_program(lexer_output);
 
-    assert_eq!(ast, ast::Program(vec![ast::Block(
+    assert_eq!(ast, Ok(ast::Program(vec![ast::Block(
         vec![
             ast::Statement::AssignmentStatement(
                 ast::Variable("bob".to_string()),
@@ -151,7 +151,7 @@ fn parser_correctly_parses_statements_that_end_in_exclamation_marks() {
                 ast::VariableOrNumberLiteral("swimming".to_string())
             )
         ]
-    )]));
+    )])));
 }
 
 #[test]
@@ -160,7 +160,7 @@ fn parser_correctly_parses_statements_that_end_in_question_marks() {
     let lexer_output = preprocessor::preprocess(lexer::lexer().parse(program).unwrap());
     let ast = parser::parse_program(lexer_output);
 
-    assert_eq!(ast, ast::Program(vec![ast::Block(
+    assert_eq!(ast, Ok(ast::Program(vec![ast::Block(
         vec![
             ast::Statement::AssignmentStatement(
                 ast::Variable("bob".to_string()),
@@ -175,7 +175,7 @@ fn parser_correctly_parses_statements_that_end_in_question_marks() {
                 ast::VariableOrNumberLiteral("swimming".to_string())
             )
         ]
-    )]));
+    )])));
 }
 
 
@@ -185,13 +185,13 @@ fn parser_correctly_parses_input_statements() {
     let lexer_output = preprocessor::preprocess(lexer::lexer().parse(program).unwrap());
     let ast = parser::parse_program(lexer_output);
 
-    assert_eq!(ast, ast::Program(vec![ast::Block(
+    assert_eq!(ast, Ok(ast::Program(vec![ast::Block(
         vec![
             ast::Statement::InputStatement(
                 ast::Variable("taylor".to_string())
             )
         ]
-    )]));
+    )])));
 }
 
 
@@ -201,11 +201,11 @@ fn parser_correctly_parses_exit_statements() {
     let lexer_output = preprocessor::preprocess(lexer::lexer().parse(program).unwrap());
     let ast = parser::parse_program(lexer_output);
 
-    assert_eq!(ast, ast::Program(vec![ast::Block(
+    assert_eq!(ast, Ok(ast::Program(vec![ast::Block(
         vec![
             ast::Statement::ExitStatement
         ]
-    )]));
+    )])));
 }
 
 
@@ -215,11 +215,11 @@ fn parser_correctly_parses_goto_statement() {
     let lexer_output = preprocessor::preprocess(lexer::lexer().parse(program).unwrap());
     let ast = parser::parse_program(lexer_output);
 
-    assert_eq!(ast, ast::Program(vec![ast::Block(
+    assert_eq!(ast, Ok(ast::Program(vec![ast::Block(
         vec![
             ast::Statement::GotoStatement(ast::VariableOrNumberLiteral("heaven".to_string()))
         ]
-    )]));
+    )])));
 }
 
 #[test]
@@ -228,7 +228,7 @@ fn parser_correctly_parses_if_statment() {
     let lexer_output = preprocessor::preprocess(lexer::lexer().parse(program).unwrap());
     let ast = parser::parse_program(lexer_output);
 
-    assert_eq!(ast, ast::Program(vec![ast::Block(
+    assert_eq!(ast, Ok(ast::Program(vec![ast::Block(
         vec![
             ast::Statement::IfStatement(
                 ast::Condition::GreaterThan(ast::VariableOrNumberLiteral("cinderella".to_string()),
@@ -236,5 +236,5 @@ fn parser_correctly_parses_if_statment() {
                 Box::new(ast::Statement::GotoStatement(ast::VariableOrNumberLiteral("heaven".to_string())))
             )
         ]
-    )]));
+    )])));
 }
