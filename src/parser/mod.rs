@@ -1,7 +1,7 @@
 use chumsky::prelude::*;
 use chumsky::primitive::Just;
 use crate::lexer::lexer_types::{LexerOutput, LexerToken};
-use crate::compiler_errors::{GRAMMAR_ERROR, CompilerError};
+use crate::compiler_errors::{UNFINISHED_THOUGHT_ERROR, CompilerError};
 use std::collections::HashSet;
 pub mod ast;
 
@@ -201,7 +201,7 @@ pub fn parse_program(input: LexerOutput) -> Result<ast::Program, Vec<CompilerErr
         let parsed_block = match statement_block_parser().parse(block.0.clone()) {
             Ok(s) => s,
             Err(_) =>  {
-                errors.push(GRAMMAR_ERROR);
+                errors.push(UNFINISHED_THOUGHT_ERROR);
                 ast::Block(vec!())
             }
         };
