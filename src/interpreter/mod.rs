@@ -3,7 +3,7 @@ use std::io::{Write, BufRead};
 use std::collections::HashMap;
 use std::ops::Rem;
 use crate::ast_to_ir::ir::{Variable, self};
-use crate::errors::runtime_errors::{self, VARIABLE_NOT_FOUND, LABEL_NOT_FOUND};
+use crate::errors::runtime_errors::{INPUT_ERROR, VARIABLE_NOT_FOUND, LABEL_NOT_FOUND, OUTPUT_ERROR};
 
 fn get_labels(ir: &Vec<ir::Instruction>) -> HashMap<BigUint, usize> {
     let mut labels = HashMap::new();
@@ -106,20 +106,20 @@ fn interpret_instruction(ir: &Vec<ir::Instruction>, instruction: &ir::Instructio
         ir::Instruction::PrintNumberInstruction(variable) => {
             match write!(output_stream, "{}", get_variable_value(variable.clone(), variable_values)) {
                 Ok(_) => {}
-                Err(_) => { runtime_errors::IO_ERROR.display() }
+                Err(_) => { OUTPUT_ERROR.display() }
             };
         }
         ir::Instruction::PrintCharacterInstruction(variable) => {
             match write!(output_stream, "{}", number_to_string(get_variable_value(variable.clone(), variable_values))) {
                 Ok(_) => {}
-                Err(_) => { runtime_errors::IO_ERROR.display() }
+                Err(_) => { OUTPUT_ERROR.display() }
             };
         }
         ir::Instruction::InputInstruction(variable) => {
             let mut input = String::new();
             match input_stream.read_line(&mut input) {
                 Ok(_) => {},
-                Err(_) => { runtime_errors::IO_ERROR.display() }
+                Err(_) => { INPUT_ERROR.display() }
             };
             let num_input = string_to_number(input.trim());
             variable_values.insert(variable.clone(), num_input);
