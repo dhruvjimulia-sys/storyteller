@@ -32,7 +32,6 @@ fn get_expression_value(expression: &ir::Expression, variable_values: &mut HashM
 }
 
 fn number_to_string(value: BigUint) -> String {
-    // e.g. 123124125 -> "abc"
     let mut result = String::new();
     let mut value = value;
     while value > 0u8.into() {

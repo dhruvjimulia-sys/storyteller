@@ -7,13 +7,12 @@ mod unit_tests;
 mod ast_to_ir;
 mod interpreter;
 #[macro_use]
-pub mod compiler_errors;
-use crate::compiler_errors::Error;
+pub mod errors;
 
 pub fn interpret(file_name: String, input_stream: &mut dyn std::io::BufRead, output_stream: &mut dyn Write) {
     let file_contents = match std::fs::read_to_string(file_name) {
         Ok(file_contents) => file_contents,
-        Err(_) => { compiler_errors::IO_ERROR.display(); return; }
+        Err(_) => { errors::FILE_NOT_FOUND_ERROR.display(); return; }
     };
     let lexer_output = lexer::lexer().parse(file_contents).expect("Lexer Error");
     let preprocessed_lexer_output = preprocessor::preprocess(lexer_output);
