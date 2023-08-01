@@ -6,11 +6,11 @@ pub const UNFINISHED_THOUGHT_ERROR: Error = Error {
 };
 
 pub const FILE_NOT_FOUND_ERROR: Error = Error {
-    error_type: "File Not Found Error",
-    error_message: "In the vast library of tales, you sought a chapter that vanished into the realm of the unknown. Perhaps it slipped through the cracks of existence or became entangled in the quantum flux. Seek it elsewhere, brave explorer, for it eludes us here."
+    error_type: "Plot Not Found Error",
+    error_message: "In the vast library of tales, the chapter you seek is lost in the unfathomable void. Perhaps it slipped through the cracks of existence or became entangled in the quantum flux. Seek it elsewhere, brave explorer, for it eludes us here."
 };
 
 pub const ILLEGAL_ARGUMENT_ERROR: Error = Error {
-    error_type: "Illegal Argument Error",
-    error_message: "Ah, wanderer of the command-line realm, you have ventured into the fog of uncertainty. The mists obscure your intentions as you offer enigmatic arguments, incomprehensible even to the wise compiler."
+    error_type: "Enigmatic Whispers Error",
+    error_message: "Listen closely, brave programmer, for the cryptic whispers of your command-line summons are incomprehensible even to the wise compiler. Alas, the words you offer are but echoes of disarray, and they remain elusive. Invoke your commands with precision to unravel the mysteries your story can offer."
 };
