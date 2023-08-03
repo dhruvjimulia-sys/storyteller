@@ -8,15 +8,35 @@ pub mod ast;
 
 fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<LexerToken>> {
     let to_be = keyword("was").or(keyword("were")).or(keyword("is")).or(keyword("are"));
-    let positive_adjective = keyword("good");
-    let negative_adjective = keyword("bad");
-    let said_keyword = keyword("said");
+    let positive_adjective =
+        keywords(&["good", "great", "awesome", "amazing", "fantastic", "wonderful", "excellent", "nice", "cool", "fun", "happy", "joyful", "joyous", "glad", "delighted", "pleased", "satisfied", "content", "cheerful", "merry", "jolly", "jovial", "jocular", "gleeful", "carefree", "untroubled", "sunny", "blithe", "elated", "exhilarated", "ecstatic", "euphoric", "overjoyed", "exultant", "rapturous", "blissful", "radiant", "thrilled", "ravished"]);
+    let negative_adjective = 
+        keyword("bad")
+        .or(keyword("terrible"));
+    let said_keyword = keyword("said")
+        .or(keyword("will").then_ignore(keyword("say")));
     let goto_keywords =
         keyword("go").then(keyword("to"))
         .or(keyword("goes").then(keyword("to")))
         .or(keyword("went").then(keyword("to")))
         .or(keyword("gone").then(keyword("to")))
         .or(keyword("going").then(keyword("to")));
+
+    fn keywords(keywords: &[&str]) -> impl Parser<LexerToken, LexerToken, Error = Simple<LexerToken>> {
+        fn or_helper(first: impl Parser<LexerToken, LexerToken, Error = Simple<LexerToken>>, second: impl Parser<LexerToken, LexerToken, Error = Simple<LexerToken>>) -> impl Parser<LexerToken, LexerToken, Error = Simple<LexerToken>> {
+            first.or(second)
+        }
+        // keywords.into_iter().reduce(|a, b| or_helper(keyword(a), keyword(b))).collect::<Vec<_>>();
+        // let result: &dyn Parser<LexerToken, LexerToken, Error = Simple<LexerToken>> = keywords.into_iter().map(|k| &keyword(k));
+        // works!
+        // let another = or_helper(result[0].clone(), result[1].clone());
+        let mut result: Box<dyn Parser<LexerToken, LexerToken, Error = Simple<LexerToken>>> = Box::new(keyword(keywords[0]));
+        let keys = keywords.into_iter().map(|k| keyword(k)).collect::<Vec<_>>();
+        for i in 1..keywords.len() {
+            result = Box::new(or_helper(result, keys[i].clone()));
+        }
+        result
+    }
     
     fn keyword(keyword: &str) -> Just<LexerToken, LexerToken, Simple<LexerToken>> {
         just(LexerToken::Text(keyword.to_string()))
