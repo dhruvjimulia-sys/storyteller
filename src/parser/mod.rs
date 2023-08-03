@@ -1,5 +1,6 @@
 use chumsky::prelude::*;
 use chumsky::primitive::Just;
+use itertools::Itertools;
 use crate::lexer::lexer_types::{LexerOutput, LexerToken};
 use crate::errors::Error;
 use crate::errors::compiler_errors;
@@ -7,13 +8,13 @@ pub mod ast;
 
 fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<LexerToken>> {
     let to_be =
-        &["was", "were", "is", "are"];
+        &["was", "were", "is", "are", "wanted to be like", "wants to be like", "wanted to be like"];
     let positive_adjective =
-        &["good", "great", "awesome", "amazing", "fantastic", "wonderful", "excellent", "nice", "cool", "fun", "happy", "joyful", "joyous", "glad", "delighted", "pleased", "satisfied", "content", "cheerful", "merry", "jolly", "jovial", "jocular", "gleeful", "carefree", "untroubled", "sunny", "blithe", "elated", "exhilarated", "ecstatic", "euphoric", "overjoyed", "exultant", "rapturous", "blissful", "radiant", "thrilled", "ravished"];
+        &["good", "great", "awesome", "amazing", "fantastic", "wonderful", "incredible", "nice", "cool", "happy", "joyful", "joyous", "glad", "delighted", "pleased", "satisfied", "content", "cheerful", "merry", "jolly", "jovial", "gleeful", "carefree", "sunny", "elated", "exhilarated", "ecstatic", "euphoric", "overjoyed", "exultant", "rapturous", "blissful", "radiant", "thrilled", "ravished"];
     let negative_adjective = 
-        &["bad", "terrible"];
+        &["bad", "terrible", "awful", "horrible", "dreadful", "unpleasant", "unlucky", "displeased", "miserable", "sad", "sorrowful", "dejected", "regretful", "depressed", "downcast", "despondent", "disconsolate", "desolate", "glum", "gloomy", "melancholic", "mournful", "forlorn", "crestfallen", "broken-hearted", "heartbroken", "grief-stricken", "disheartened", "dismayed", "dispirited", "discouraged", "hopeless"];
     let said_keywords =
-        &["said"];
+        &["said", "stated", "exclaimed", "whispered", "shouted", "mumbled", "replied", "responded", "declared", "announced", "asserted", "acknowledged", "conveyed", "uttered", "ventured", "suggested", "disclosed", "protested", "objected", "interjected", "speculated", "greeted", "quoted", "noted", "mentioned", "alledged", "insisted", "confessed", "recited", "pleaded", "concluded", "inquired", "muttered"];
     let goto_keywords =
         &["go to", "goes to", "went to", "gone to", "going to"];
 
@@ -26,7 +27,8 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
             }
             full_keyword_result
         }
-        
+
+        let keywords = keywords.iter().unique().collect::<Vec<_>>();
         let mut result: Box<dyn Parser<LexerToken, LexerToken, Error = Simple<LexerToken>>> = Box::new(full_keyword(keywords[0]));
         for i in 1..keywords.len() {
             result = Box::new(result.or(full_keyword(keywords[i])));
