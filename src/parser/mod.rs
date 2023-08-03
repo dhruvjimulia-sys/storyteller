@@ -15,24 +15,28 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
     let said_keyword = keyword("said")
         .or(keyword("will").then_ignore(keyword("say")));
     let goto_keywords =
-        keyword("go").then(keyword("to"))
-        .or(keyword("goes").then(keyword("to")))
-        .or(keyword("went").then(keyword("to")))
-        .or(keyword("gone").then(keyword("to")))
-        .or(keyword("going").then(keyword("to")));
+        keywords(&["go to", "goes to", "went to", "gone to", "going to"]);
 
     fn keywords(keywords: &[&str]) -> impl Parser<LexerToken, LexerToken, Error = Simple<LexerToken>> {
         fn or_helper(first: impl Parser<LexerToken, LexerToken, Error = Simple<LexerToken>>, second: impl Parser<LexerToken, LexerToken, Error = Simple<LexerToken>>) -> impl Parser<LexerToken, LexerToken, Error = Simple<LexerToken>> {
             first.or(second)
         }
-        // keywords.into_iter().reduce(|a, b| or_helper(keyword(a), keyword(b))).collect::<Vec<_>>();
-        // let result: &dyn Parser<LexerToken, LexerToken, Error = Simple<LexerToken>> = keywords.into_iter().map(|k| &keyword(k));
-        // works!
-        // let another = or_helper(result[0].clone(), result[1].clone());
-        let mut result: Box<dyn Parser<LexerToken, LexerToken, Error = Simple<LexerToken>>> = Box::new(keyword(keywords[0]));
-        let keys = keywords.into_iter().map(|k| keyword(k)).collect::<Vec<_>>();
+        fn then_ignore_helper(first: impl Parser<LexerToken, LexerToken, Error = Simple<LexerToken>>, second: impl Parser<LexerToken, LexerToken, Error = Simple<LexerToken>>) -> impl Parser<LexerToken, LexerToken, Error = Simple<LexerToken>> {
+            first.then_ignore(second)
+        }
+        
+        fn full_keyword(full_keyword: &str) -> impl Parser<LexerToken, LexerToken, Error = Simple<LexerToken>> {
+            let full_split = full_keyword.split(" ").filter(|key| key.len() != 0).collect::<Vec<_>>();
+            let mut full_keyword_result: Box<dyn Parser<LexerToken, LexerToken, Error = Simple<LexerToken>>> = Box::new(keyword(full_split[0]));
+            for i in 1..full_split.len() {
+                full_keyword_result = Box::new(then_ignore_helper(full_keyword_result, keyword(full_split[i])));
+            }
+            full_keyword_result
+        }
+        
+        let mut result: Box<dyn Parser<LexerToken, LexerToken, Error = Simple<LexerToken>>> = Box::new(full_keyword(keywords[0]));
         for i in 1..keywords.len() {
-            result = Box::new(or_helper(result, keys[i].clone()));
+            result = Box::new(or_helper(result, full_keyword(keywords[i])));
         }
         result
     }
