@@ -6,41 +6,33 @@ use crate::errors::compiler_errors;
 pub mod ast;
 
 fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<LexerToken>> {
-    let to_be = keyword("was").or(keyword("were")).or(keyword("is")).or(keyword("are"));
+    let to_be = keywords(&["was", "were", "is", "are"]);
     let positive_adjective =
         keywords(&["good", "great", "awesome", "amazing", "fantastic", "wonderful", "excellent", "nice", "cool", "fun", "happy", "joyful", "joyous", "glad", "delighted", "pleased", "satisfied", "content", "cheerful", "merry", "jolly", "jovial", "jocular", "gleeful", "carefree", "untroubled", "sunny", "blithe", "elated", "exhilarated", "ecstatic", "euphoric", "overjoyed", "exultant", "rapturous", "blissful", "radiant", "thrilled", "ravished"]);
     let negative_adjective = 
-        keyword("bad")
-        .or(keyword("terrible"));
+        keywords(&["bad", "terrible"]);
     let said_keyword = keyword("said")
         .or(keyword("will").then_ignore(keyword("say")));
     let goto_keywords =
         keywords(&["go to", "goes to", "went to", "gone to", "going to"]);
 
     fn keywords(keywords: &[&str]) -> impl Parser<LexerToken, LexerToken, Error = Simple<LexerToken>> {
-        fn or_helper(first: impl Parser<LexerToken, LexerToken, Error = Simple<LexerToken>>, second: impl Parser<LexerToken, LexerToken, Error = Simple<LexerToken>>) -> impl Parser<LexerToken, LexerToken, Error = Simple<LexerToken>> {
-            first.or(second)
-        }
-        fn then_ignore_helper(first: impl Parser<LexerToken, LexerToken, Error = Simple<LexerToken>>, second: impl Parser<LexerToken, LexerToken, Error = Simple<LexerToken>>) -> impl Parser<LexerToken, LexerToken, Error = Simple<LexerToken>> {
-            first.then_ignore(second)
-        }
-        
         fn full_keyword(full_keyword: &str) -> impl Parser<LexerToken, LexerToken, Error = Simple<LexerToken>> {
             let full_split = full_keyword.split(" ").filter(|key| key.len() != 0).collect::<Vec<_>>();
             let mut full_keyword_result: Box<dyn Parser<LexerToken, LexerToken, Error = Simple<LexerToken>>> = Box::new(keyword(full_split[0]));
             for i in 1..full_split.len() {
-                full_keyword_result = Box::new(then_ignore_helper(full_keyword_result, keyword(full_split[i])));
+                full_keyword_result = Box::new(full_keyword_result.then_ignore(keyword(full_split[i])));
             }
             full_keyword_result
         }
         
         let mut result: Box<dyn Parser<LexerToken, LexerToken, Error = Simple<LexerToken>>> = Box::new(full_keyword(keywords[0]));
         for i in 1..keywords.len() {
-            result = Box::new(or_helper(result, full_keyword(keywords[i])));
+            result = Box::new(result.or(full_keyword(keywords[i])));
         }
         result
     }
-    
+
     fn keyword(keyword: &str) -> Just<LexerToken, LexerToken, Simple<LexerToken>> {
         just(LexerToken::Text(keyword.to_string()))
     }
@@ -108,7 +100,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         quote.clone()
         .ignore_then(inner_quote.clone()
         .ignore_then(quote.clone()
-        .ignore_then(take_until(said_keyword.clone()))
+        .ignore_then(take_until(said_keyword))
         .then_ignore(adverb_keyword.clone())))
         .map(|(number, _)| ast::Statement::PrintCharacterStatement(
             ast::Variable(lexer_tokens_to_name(number))
