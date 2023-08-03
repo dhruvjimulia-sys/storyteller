@@ -19,7 +19,8 @@ fn test_interpreter() {
                 &mut Cursor::new(input.as_bytes()),
                 &mut actual_output
             );
-            assert_eq!(String::from_utf8(actual_output.into_inner()).unwrap(), expected_output);
+            assert_eq!(String::from_utf8(actual_output.into_inner()).unwrap(), expected_output, "Failed: {}", path.to_str().unwrap());
+            println!("Passed: {}", path.to_str().unwrap());
         }
     }
 }

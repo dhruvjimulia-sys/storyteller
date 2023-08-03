@@ -2,7 +2,6 @@ use crate::parser::ast;
 use std::collections::HashSet;
 use num::{BigUint, Zero};
 use chumsky::prelude::*;
-use std::ops::Rem;
 pub mod ir;
 mod variable_extractor;
 
@@ -101,16 +100,12 @@ fn replace_if_poetic_literal(value: ast::VariableOrNumberLiteral, variables: &Ha
 
 pub fn convert_poetic_literal_to_integer(poetic_literal: String) -> BigUint {
     fn convert_poetic_string_to_digit(poetic_string: String) -> u8 {
-        let mut result: BigUint = Zero::zero();
-        for c in poetic_string.to_lowercase().chars() {
-            result += (c as u8) - ('a' as u8) + 1
-        }
-       let result_digits = (result.rem(BigUint::new(vec!(10)))).to_u32_digits();
-       if result_digits.len() == 0 { 0 } else { result_digits[0] as u8 }
+        (poetic_string.len() % 10).try_into().unwrap()
     }
     
     let mut result: BigUint = Zero::zero();
-    let poetic_literal_spaces_split = text::ident::<_, Simple<char>>().padded().repeated().parse(poetic_literal).unwrap();
+    let digits_radix = 36;
+    let poetic_literal_spaces_split = text::digits::<_, Simple<char>>(digits_radix).padded().repeated().parse(poetic_literal).unwrap();
 
     for i in 0..poetic_literal_spaces_split.len() {
         let pow = 10_usize.pow((poetic_literal_spaces_split.len() - i - 1) as u32);

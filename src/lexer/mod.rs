@@ -6,8 +6,9 @@ pub fn lexer() -> impl Parser<char, LexerOutput, Error = Simple<char>> {
     let inline_whitespace = filter(|c: &char| c.is_inline_whitespace()).repeated();
     let newline = just('\n');
 
+    let digits_radix = 36;
     let lexer_token =
-        text::ident::<_, Simple<char>>().map(|s| LexerToken::Text(s.to_string()))
+        text::digits(digits_radix).map(|s| LexerToken::Text(s))
         .or(just(",").map(|_| LexerToken::Comma))
         .or(just("\"").or(just("“").or(just("”"))).map(|_| LexerToken::Quote))
         .or(just(".").map(|_| LexerToken::Period))
