@@ -6,15 +6,16 @@ use crate::errors::compiler_errors;
 pub mod ast;
 
 fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<LexerToken>> {
-    let to_be = keywords(&["was", "were", "is", "are"]);
+    let to_be =
+        &["was", "were", "is", "are"];
     let positive_adjective =
-        keywords(&["good", "great", "awesome", "amazing", "fantastic", "wonderful", "excellent", "nice", "cool", "fun", "happy", "joyful", "joyous", "glad", "delighted", "pleased", "satisfied", "content", "cheerful", "merry", "jolly", "jovial", "jocular", "gleeful", "carefree", "untroubled", "sunny", "blithe", "elated", "exhilarated", "ecstatic", "euphoric", "overjoyed", "exultant", "rapturous", "blissful", "radiant", "thrilled", "ravished"]);
+        &["good", "great", "awesome", "amazing", "fantastic", "wonderful", "excellent", "nice", "cool", "fun", "happy", "joyful", "joyous", "glad", "delighted", "pleased", "satisfied", "content", "cheerful", "merry", "jolly", "jovial", "jocular", "gleeful", "carefree", "untroubled", "sunny", "blithe", "elated", "exhilarated", "ecstatic", "euphoric", "overjoyed", "exultant", "rapturous", "blissful", "radiant", "thrilled", "ravished"];
     let negative_adjective = 
-        keywords(&["bad", "terrible"]);
-    let said_keyword = keyword("said")
-        .or(keyword("will").then_ignore(keyword("say")));
+        &["bad", "terrible"];
+    let said_keywords =
+        &["said"];
     let goto_keywords =
-        keywords(&["go to", "goes to", "went to", "gone to", "going to"]);
+        &["go to", "goes to", "went to", "gone to", "going to"];
 
     fn keywords(keywords: &[&str]) -> impl Parser<LexerToken, LexerToken, Error = Simple<LexerToken>> {
         fn full_keyword(full_keyword: &str) -> impl Parser<LexerToken, LexerToken, Error = Simple<LexerToken>> {
@@ -51,7 +52,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
     });
 
     let assignment_statement =
-        take_until(to_be)
+        take_until(keywords(to_be))
         .then(filter(|token| match token {
             LexerToken::Text(_) => true,
             _ => false
@@ -65,7 +66,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
     let addition_statement =
         take_until(keyword("felt"))
         .then_ignore(keyword("as"))
-        .then_ignore(positive_adjective)
+        .then_ignore(keywords(positive_adjective))
         .then_ignore(keyword("as"))
         .then(take_until(end()))
         .map(|((a, _), (b, _))| ast::Statement::AddStatement(
@@ -76,7 +77,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
     let subtraction_statement =
         take_until(keyword("felt"))
         .then_ignore(keyword("as"))
-        .then_ignore(negative_adjective)
+        .then_ignore(keywords(negative_adjective))
         .then_ignore(keyword("as"))
         .then(take_until(end()))
         .map(|((a, _), (b, _))| ast::Statement::SubStatement(
@@ -91,7 +92,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
     let print_number_statement =
         quote.clone()
         .ignore_then(inner_quote.clone()
-        .ignore_then(quote.clone().ignore_then(take_until(said_keyword.clone()))))
+        .ignore_then(quote.clone().ignore_then(take_until(keywords(said_keywords)))))
         .map(|(number, _)| ast::Statement::PrintNumberStatement(
             ast::Variable(lexer_tokens_to_name(number)))
         );
@@ -100,7 +101,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         quote.clone()
         .ignore_then(inner_quote.clone()
         .ignore_then(quote.clone()
-        .ignore_then(take_until(said_keyword))
+        .ignore_then(take_until(keywords(said_keywords)))
         .then_ignore(adverb_keyword.clone())))
         .map(|(number, _)| ast::Statement::PrintCharacterStatement(
             ast::Variable(lexer_tokens_to_name(number))
@@ -123,7 +124,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         ));
 
     let goto_statement =
-        take_until(goto_keywords)
+        take_until(keywords(goto_keywords))
         .ignore_then(take_until(end()))
         .map(|(name, _)| ast::Statement::GotoStatement(
             ast::VariableOrNumberLiteral(lexer_tokens_to_name(name))
