@@ -1,4 +1,4 @@
-Taylor was an great human being.
+Taylor was a great human being.
 
 Taylor felt as bad as rain.
 

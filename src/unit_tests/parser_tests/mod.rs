@@ -11,7 +11,7 @@ fn parser_correctly_parses_assignment_statement_with_was() {
         vec![
             ast::Statement::AssignmentStatement(
                 ast::Variable("charlie".to_string()),
-                ast::VariableOrNumberLiteral("wizard".to_string())
+                ast::VariableOrNumberLiteral("a wizard".to_string())
             )
         ]
     )]));
@@ -25,7 +25,7 @@ fn parser_correctly_parses_assignment_statement_with_were() {
     assert_eq!(ast, ast::Program(vec![ast::Block(
         vec![
             ast::Statement::AssignmentStatement(
-                ast::Variable("dog and cat".to_string()),
+                ast::Variable("the dog and the cat".to_string()),
                 ast::VariableOrNumberLiteral("great company".to_string())
             )
         ]
@@ -72,7 +72,7 @@ fn parser_correctly_parses_add_statement() {
         vec![
             ast::Statement::AddStatement(
                 ast::Variable("percy".to_string()),
-                ast::VariableOrNumberLiteral("friend".to_string())
+                ast::VariableOrNumberLiteral("a friend".to_string())
             )
         ]
     )]));
@@ -217,7 +217,7 @@ fn parser_correctly_parses_if_statment() {
         vec![
             ast::Statement::IfStatement(
                 ast::Condition::GreaterThan(ast::VariableOrNumberLiteral("cinderella".to_string()),
-                ast::VariableOrNumberLiteral("prince".to_string())),
+                ast::VariableOrNumberLiteral("the prince".to_string())),
                 Box::new(ast::Statement::GotoStatement(ast::VariableOrNumberLiteral("heaven".to_string())))
             )
         ]

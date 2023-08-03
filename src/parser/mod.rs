@@ -3,7 +3,6 @@ use chumsky::primitive::Just;
 use crate::lexer::lexer_types::{LexerOutput, LexerToken};
 use crate::errors::Error;
 use crate::errors::compiler_errors;
-use std::collections::HashSet;
 pub mod ast;
 
 fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<LexerToken>> {
@@ -43,13 +42,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
     }
 
     fn lexer_tokens_to_name(vec: Vec<LexerToken>) -> String {
-        let articles_and_possessives = HashSet::from(["a", "an", "the", "my", "your", "his", "her", "its", "our", "their"]);
-
         vec.into_iter()
-        .filter(|token| match token {
-            LexerToken::Text(s) => !articles_and_possessives.contains(s.as_str()),
-            _ => true
-        })
         .map(|token| match token {
             LexerToken::Text(s) => s,
             _ => "".to_string()
