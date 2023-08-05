@@ -142,19 +142,19 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
 
     fn if_statement(statement_parser: Recursive<'_, LexerToken, ast::Statement, Simple<LexerToken>>) -> impl Parser<LexerToken, ast::Statement, Error = Simple<LexerToken>> + '_ {
         let positive_comparative_adjective =
-            keyword("better").or(keyword("greater")).or(keyword("more"));
+            &["better", "greater", "stronger", "larger"];
         let negative_comparative_adjective =
-            keyword("worse").or(keyword("less"));
+            &["worse", "less", "fewer", "smaller"];
         let comma = just(LexerToken::Comma);
         let condition =
-            take_until(keyword("is").then(positive_comparative_adjective).then(keyword("than")))
+            take_until(keyword("is").or(keyword("felt")).then(keywords(positive_comparative_adjective)).then(keyword("than")))
             .then(take_until(end()))
             .map(|((lhs, _), (rhs, _))| ast::Condition::GreaterThan(
                 ast::VariableOrNumberLiteral(lexer_tokens_to_name(lhs)),
                 ast::VariableOrNumberLiteral(lexer_tokens_to_name(rhs))
             ))
             .or(
-                take_until(keyword("is").then(negative_comparative_adjective).then(keyword("than")))
+                take_until(keyword("is").or(keyword("felt")).then(keywords(negative_comparative_adjective)).then(keyword("than")))
                 .then(take_until(end()))
                 .map(|((lhs, _), (rhs, _))| ast::Condition::LessThan(
                     ast::VariableOrNumberLiteral(lexer_tokens_to_name(lhs)),
