@@ -13,7 +13,7 @@ pub fn replace_pronouns(ast: &ast::Program, variables: &HashSet<ir::Variable>) -
                             (ast::Variable(curr_var.0.clone()), curr)
                         }
                         None => {
-                            compiler_errors::PRONOUN_NO_ANTECEDENT_ERROR.display();
+                            compiler_errors::pronoun_no_antecedent_error().display();
                             (ast::Variable("".to_string()), None)
                         }
                     }
@@ -33,7 +33,7 @@ pub fn replace_pronouns(ast: &ast::Program, variables: &HashSet<ir::Variable>) -
                             (ast::VariableOrNumberLiteral(curr_var.0.clone()), curr)
                         }
                         None => {
-                            compiler_errors::PRONOUN_NO_ANTECEDENT_ERROR.display();
+                            compiler_errors::pronoun_no_antecedent_error().display();
                             (ast::VariableOrNumberLiteral("".to_string()), None)
                         }
                     }

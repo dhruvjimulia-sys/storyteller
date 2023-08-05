@@ -13,7 +13,7 @@ use errors::compiler_errors;
 pub fn interpret(file_name: String, input_stream: &mut dyn std::io::BufRead, output_stream: &mut dyn Write) {
     let file_contents = match std::fs::read_to_string(file_name) {
         Ok(file_contents) => file_contents,
-        Err(_) => { compiler_errors::FILE_NOT_FOUND_ERROR.display(); return; }
+        Err(_) => { compiler_errors::file_not_found_error().display(); return; }
     };
     let lexer_output = lexer::lexer().parse(file_contents).expect("Lexer Error");
     let preprocessed_lexer_output = preprocessor::preprocess(lexer_output);

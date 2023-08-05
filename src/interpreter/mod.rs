@@ -3,7 +3,7 @@ use std::io::{Write, BufRead};
 use std::collections::HashMap;
 use std::ops::Rem;
 use crate::ast_to_ir::ir::{Variable, self};
-use crate::errors::runtime_errors::{INPUT_ERROR, VARIABLE_NOT_FOUND, LABEL_NOT_FOUND, OUTPUT_ERROR};
+use crate::errors::runtime_errors::{input_error, variable_not_found, label_not_found, output_error};
 
 fn get_labels(ir: &Vec<ir::Instruction>) -> HashMap<BigUint, usize> {
     let mut labels = HashMap::new();
@@ -21,7 +21,7 @@ fn get_labels(ir: &Vec<ir::Instruction>) -> HashMap<BigUint, usize> {
 fn get_variable_value(variable: Variable, variable_values: &mut HashMap<Variable, BigUint>) -> BigUint {
     match variable_values.get(&variable) {
         Some(value) => value.clone(),
-        None => { VARIABLE_NOT_FOUND.display(); BigUint::from(0u8) }
+        None => { variable_not_found(variable.0.to_string()).display(); BigUint::from(0u8) }
     }
 }
 
@@ -106,20 +106,20 @@ fn interpret_instruction(ir: &Vec<ir::Instruction>, instruction: &ir::Instructio
         ir::Instruction::PrintNumberInstruction(variable) => {
             match write!(output_stream, "{}", get_variable_value(variable.clone(), variable_values)) {
                 Ok(_) => {}
-                Err(_) => { OUTPUT_ERROR.display() }
+                Err(_) => { output_error().display() }
             };
         }
         ir::Instruction::PrintCharacterInstruction(variable) => {
             match write!(output_stream, "{}", number_to_string(get_variable_value(variable.clone(), variable_values))) {
                 Ok(_) => {}
-                Err(_) => { OUTPUT_ERROR.display() }
+                Err(_) => { input_error().display() }
             };
         }
         ir::Instruction::InputInstruction(variable) => {
             let mut input = String::new();
             match input_stream.read_line(&mut input) {
                 Ok(_) => {},
-                Err(_) => { INPUT_ERROR.display() }
+                Err(_) => { input_error().display() }
             };
             let num_input = string_to_number(input.trim());
             variable_values.insert(variable.clone(), num_input);
@@ -132,7 +132,7 @@ fn interpret_instruction(ir: &Vec<ir::Instruction>, instruction: &ir::Instructio
                 &get_expression_value(expression, variable_values)
             ) {
                 Some(value) => *value,
-                None => { LABEL_NOT_FOUND.display(); return; }
+                None => { label_not_found().display(); return; }
             };
             interpret_helper(ir, variable_values, labels, new_instruction_pointer, input_stream, output_stream);
             return;
