@@ -40,11 +40,6 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         }).collect::<Vec<_>>().join(" ")
     }
 
-    let adverb_keyword = filter(|token: &LexerToken| match token {
-        LexerToken::Text(s) => s.ends_with("ly"),
-        _ => false
-    });
-
     fn text_tokens_except(token_set: HashSet<String>, min_num_tokens: usize) -> impl Parser<LexerToken, Vec<LexerToken>, Error = Simple<LexerToken>> {
         filter(move |token| match token {
             LexerToken::Text(text) => {
@@ -59,10 +54,17 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         text_tokens_except(HashSet::new(), min_num_tokens)
     }
 
+    let optional_surbodinate_clause = just(LexerToken::Comma).then(any().repeated()).or_not();
+    let adverb_keyword = filter(|token: &LexerToken| match token {
+        LexerToken::Text(s) => s.ends_with("ly"),
+        _ => false
+    });
+
     let assignment_statement =
         text_tokens_except(defs().to_be, 1)
         .then_ignore(keywords(&defs().to_be))
         .then(text_tokens(1))
+        .then_ignore(optional_surbodinate_clause.clone())
         .then_ignore(end())
         .map(|(a, b)| ast::Statement::AssignmentStatement(
             ast::Variable(lexer_tokens_to_name(a)),
@@ -76,6 +78,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         .then_ignore(keywords(&defs().positive_adjective))
         .then_ignore(keyword("as"))
         .then(text_tokens(1))
+        .then_ignore(optional_surbodinate_clause.clone())
         .then_ignore(end())
         .map(|(a, b)| ast::Statement::AddStatement(
             ast::Variable(lexer_tokens_to_name(a)),
@@ -89,6 +92,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         .then_ignore(keywords(&defs().negative_adjective))
         .then_ignore(keyword("as"))
         .then(text_tokens(1))
+        .then_ignore(optional_surbodinate_clause.clone())
         .then_ignore(end())
         .map(|(a, b)| ast::Statement::SubStatement(
             ast::Variable(lexer_tokens_to_name(a)),
@@ -106,6 +110,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
             text_tokens_except(defs().said, 1)
             .then_ignore(keywords(&defs().said))
         )))
+        .then_ignore(optional_surbodinate_clause.clone())
         .then_ignore(end())
         .map(|number| ast::Statement::PrintNumberStatement(
             ast::Variable(lexer_tokens_to_name(number)))
@@ -120,6 +125,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
             .then_ignore(keywords(&defs().said)
         ))
         .then_ignore(adverb_keyword.clone())))
+        .then_ignore(optional_surbodinate_clause.clone())
         .then_ignore(end())
         .map(|number| ast::Statement::PrintStringStatement(
             ast::Variable(lexer_tokens_to_name(number))
@@ -140,6 +146,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         .then_ignore(keyword("for"))
         .then_ignore(keyword("an"))
         .then_ignore(keyword("answer"))
+        .then_ignore(optional_surbodinate_clause.clone())
         .then_ignore(end())
         .map(|name| ast::Statement::InputStatement(
             ast::Variable(lexer_tokens_to_name(name))
@@ -149,6 +156,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         text_tokens_except(defs().goto, 0)
         .ignore_then(keywords(&defs().goto))
         .ignore_then(text_tokens(1))
+        .then_ignore(optional_surbodinate_clause)
         .then_ignore(end())
         .map(|name| ast::Statement::GotoStatement(
             ast::VariableOrNumberLiteral(lexer_tokens_to_name(name))
@@ -170,6 +178,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         }
         
         let comma = just(LexerToken::Comma);
+        let optional_surbodinate_clause = just(LexerToken::Comma).then(any::<LexerToken, Simple<LexerToken>>().repeated()).or_not();
         let greater_than_condition = keywords(&defs().to_be).or(keyword("felt")).then(keywords(&defs().positive_comparative_adjective)).then(keyword("than"));
         let less_than_condition = keywords(&defs().to_be).or(keyword("felt")).then(keywords(&defs().negative_comparative_adjective)).then(keyword("than"));
         let equal_to_condition = keywords(&defs().to_be).or(keywords(&to_strings(HashSet::from(["want to be like", "wanted to be like", "wants to be like"])))); 
@@ -216,6 +225,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         .ignore_then(text_tokens(1))
         .then_ignore(comma)
         .then_ignore(keyword("then"))
+        .then_ignore(optional_surbodinate_clause)
         .then(take_until(end()))
         .map(move |(condition_tokens, (consequence, _))| {
             ast::Statement::IfStatement(
