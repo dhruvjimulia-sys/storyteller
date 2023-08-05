@@ -45,40 +45,53 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         _ => false
     });
 
-    let assignment_statement =
-        filter(|token| match token {
-            LexerToken::Text(text) => !defs().to_be.contains(text),
+    fn text_tokens_except(token_set: HashSet<String>, min_num_tokens: usize) -> impl Parser<LexerToken, Vec<LexerToken>, Error = Simple<LexerToken>> {
+        filter(move |token| match token {
+            LexerToken::Text(text) => {
+                let t_set = token_set.iter().map(|s| s.split(" ").collect::<Vec<_>>()[0].to_string()).collect::<HashSet<_>>();
+                !t_set.contains(text)
+            },
             _ => false
-        }).repeated().at_least(1)
-        .then(keywords(&defs().to_be))
+        }).repeated().at_least(min_num_tokens)
+    }
+
+    fn text_tokens(min_num_tokens: usize) -> impl Parser<LexerToken, Vec<LexerToken>, Error = Simple<LexerToken>>  {
+        text_tokens_except(HashSet::new(), min_num_tokens)
+    }
+
+    let assignment_statement =
+        text_tokens_except(defs().to_be, 1)
+        .then_ignore(keywords(&defs().to_be))
         .then(filter(|token| match token {
             LexerToken::Text(_) => true,
             _ => false
         }).repeated())
         .then_ignore(end())
-        .map(|((a, _), b)| ast::Statement::AssignmentStatement(
+        .map(|(a, b)| ast::Statement::AssignmentStatement(
             ast::Variable(lexer_tokens_to_name(a)),
             ast::VariableOrNumberLiteral(lexer_tokens_to_name(b))
         ));
 
     let addition_statement =
-        take_until(keyword("felt"))
+        text_tokens_except(HashSet::from(["felt".to_string()]), 1)
+        .then_ignore(keyword("felt"))
         .then_ignore(keyword("as"))
         .then_ignore(keywords(&defs().positive_adjective))
         .then_ignore(keyword("as"))
-        .then(take_until(end()))
-        .map(|((a, _), (b, _))| ast::Statement::AddStatement(
+        .then(text_tokens(1))
+        .map(|(a, b)| ast::Statement::AddStatement(
             ast::Variable(lexer_tokens_to_name(a)),
             ast::VariableOrNumberLiteral(lexer_tokens_to_name(b))
         ));
 
     let subtraction_statement =
-        take_until(keyword("felt"))
+        text_tokens_except(HashSet::from(["felt".to_string()]), 1)
+        .then_ignore(keyword("felt"))
         .then_ignore(keyword("as"))
         .then_ignore(keywords(&defs().negative_adjective))
         .then_ignore(keyword("as"))
-        .then(take_until(end()))
-        .map(|((a, _), (b, _))| ast::Statement::SubStatement(
+        .then(text_tokens(1))
+        .map(|(a, b)| ast::Statement::SubStatement(
             ast::Variable(lexer_tokens_to_name(a)),
             ast::VariableOrNumberLiteral(lexer_tokens_to_name(b))
         ));
@@ -90,23 +103,32 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
     let print_number_statement =
         quote.clone()
         .ignore_then(inner_quote.clone()
-        .ignore_then(quote.clone().ignore_then(take_until(keywords(&defs().said)))))
-        .map(|(number, _)| ast::Statement::PrintNumberStatement(
+        .ignore_then(quote.clone().ignore_then(
+            text_tokens_except(defs().said, 1)
+            .then_ignore(keywords(&defs().said))
+        )))
+        .map(|number| ast::Statement::PrintNumberStatement(
             ast::Variable(lexer_tokens_to_name(number)))
         );
 
-    let print_character_statement =
+    let print_string_statement =
         quote.clone()
         .ignore_then(inner_quote.clone()
         .ignore_then(quote.clone()
-        .ignore_then(take_until(keywords(&defs().said)))
+        .ignore_then(
+            text_tokens_except(defs().said, 1)
+            .then_ignore(keywords(&defs().said)
+        ))
         .then_ignore(adverb_keyword.clone())))
-        .map(|(number, _)| ast::Statement::PrintStringStatement(
+        .map(|number| ast::Statement::PrintStringStatement(
             ast::Variable(lexer_tokens_to_name(number))
         ));
 
+    let looks_keyword = HashSet::from(["looked".to_string(), "looks".to_string()]);
+
     let input_statement =
-        take_until(keyword("looked").or(keyword("looks")))
+        text_tokens_except(looks_keyword.clone(), 1)
+        .then_ignore(keywords(&looks_keyword))
         .then_ignore(keyword("up"))
         .then_ignore(keyword("to"))
         .then_ignore(keyword("the"))
@@ -117,14 +139,15 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         .then_ignore(keyword("for"))
         .then_ignore(keyword("an"))
         .then_ignore(keyword("answer"))
-        .map(|(name, _)| ast::Statement::InputStatement(
+        .map(|name| ast::Statement::InputStatement(
             ast::Variable(lexer_tokens_to_name(name))
         ));
 
     let goto_statement =
-        take_until(keywords(&defs().goto))
-        .ignore_then(take_until(end()))
-        .map(|(name, _)| ast::Statement::GotoStatement(
+        text_tokens_except(defs().goto, 0)
+        .ignore_then(keywords(&defs().goto))
+        .ignore_then(text_tokens(1))
+        .map(|name| ast::Statement::GotoStatement(
             ast::VariableOrNumberLiteral(lexer_tokens_to_name(name))
         ));
 
@@ -142,52 +165,64 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         }
         
         let comma = just(LexerToken::Comma);
+        let greater_than_condition = keywords(&defs().to_be).or(keyword("felt")).then(keywords(&defs().positive_comparative_adjective)).then(keyword("than"));
+        let less_than_condition = keywords(&defs().to_be).or(keyword("felt")).then(keywords(&defs().negative_comparative_adjective)).then(keyword("than"));
+        let equal_to_condition = keywords(&defs().to_be).or(keywords(&to_strings(HashSet::from(["want to be like", "wanted to be like", "wants to be like"])))); 
+        let not_equal_to_condition = keywords(&defs().to_be).ignore_then(keyword("not")).or(keywords(&to_strings(HashSet::from(["did not want to be like", "does not want to be like"])))); 
+        let condition_start_tokens = defs().to_be.clone().into_iter().chain(vec!["felt".to_string()]).collect::<HashSet<_>>(); 
+        
         let condition =
-            take_until(keywords(&defs().to_be).or(keyword("felt")).then(keywords(&defs().positive_comparative_adjective)).then(keyword("than")))
-            .then(take_until(end()))
-            .map(|((lhs, _), (rhs, _))| ast::Condition::GreaterThan(
+            text_tokens_except(condition_start_tokens.clone(), 1)
+            .then_ignore(greater_than_condition)
+            .then(text_tokens(1))
+            .map(|(lhs, rhs)| ast::Condition::GreaterThan(
                 ast::VariableOrNumberLiteral(lexer_tokens_to_name(lhs)),
                 ast::VariableOrNumberLiteral(lexer_tokens_to_name(rhs))
             ))
             .or(
-                take_until(keywords(&defs().to_be).or(keyword("felt")).then(keywords(&defs().negative_comparative_adjective)).then(keyword("than")))
-                .then(take_until(end()))
-                .map(|((lhs, _), (rhs, _))| ast::Condition::LessThan(
+                text_tokens_except(condition_start_tokens.clone(), 1)
+                .then_ignore(less_than_condition)
+                .then(text_tokens(1))
+                .map(|(lhs, rhs)| ast::Condition::LessThan(
                     ast::VariableOrNumberLiteral(lexer_tokens_to_name(lhs)),
                     ast::VariableOrNumberLiteral(lexer_tokens_to_name(rhs))
                 ))
             )
             .or(
-                take_until(keywords(&defs().to_be).or(keywords(&to_strings(HashSet::from(["want to be like", "wanted to be like", "wants to be like"])))))
-                .then(take_until(end()))
-                .map(|((lhs, _), (rhs, _))| ast::Condition::EqualTo(
+                text_tokens_except(condition_start_tokens.clone(), 1)
+                .then_ignore(equal_to_condition)
+                .then(text_tokens(1))
+                .map(|(lhs, rhs)| ast::Condition::EqualTo(
                     ast::VariableOrNumberLiteral(lexer_tokens_to_name(lhs)),
                     ast::VariableOrNumberLiteral(lexer_tokens_to_name(rhs))
                 ))
             )
             .or(
-                take_until(keywords(&defs().to_be).ignore_then(keyword("not")).or(keywords(&to_strings(HashSet::from(["did not want to be like", "does not want to be like"])))))
-                .then(take_until(end()))
-                .map(|((lhs, _), (rhs, _))| ast::Condition::NotEqualTo(
+                text_tokens_except(condition_start_tokens, 1)
+                .then_ignore(not_equal_to_condition)
+                .then(text_tokens(1))
+                .map(|(lhs, rhs)| ast::Condition::NotEqualTo(
                     ast::VariableOrNumberLiteral(lexer_tokens_to_name(lhs)),
                     ast::VariableOrNumberLiteral(lexer_tokens_to_name(rhs))
                 ))
             );
 
         keyword("if")
-        .ignore_then(take_until(comma))
+        .ignore_then(text_tokens(1))
+        .then_ignore(comma)
         .then_ignore(keyword("then"))
         .then(take_until(end()))
-        .map(move |((condition_tokens, _), (consequence, _))| ast::Statement::IfStatement(
+        .map(move |(condition_tokens, (consequence, _))| {
+            ast::Statement::IfStatement(
             condition.parse(condition_tokens).unwrap(),
             Box::new(statement_parser.parse(consequence).unwrap())
-        ))
+        )})
     }
 
     let statement = recursive(|statement| {
         if_statement(statement)
         .or(input_statement)
-        .or(print_character_statement)
+        .or(print_string_statement)
         .or(print_number_statement)
         .or(assignment_statement)
         .or(addition_statement)
@@ -215,7 +250,9 @@ fn statement_block_parser() -> impl Parser<LexerToken, ast::Block, Error = Simpl
         .map(|statements| {
             ast::Block(statements.into_iter()
             .filter(|statement| !statement.is_empty())
-            .map(|statement| statement_parser().parse(statement).unwrap()).collect())
+            .map(|statement| {
+                statement_parser().parse(statement).unwrap()
+            }).collect())
         });
     block_parser
 }
