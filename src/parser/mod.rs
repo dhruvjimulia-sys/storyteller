@@ -1,5 +1,6 @@
 use chumsky::prelude::*;
 use chumsky::primitive::Just;
+use std::collections::HashSet;
 use itertools::Itertools;
 use crate::lexer::lexer_types::{LexerOutput, LexerToken};
 use crate::errors::Error;
@@ -9,7 +10,7 @@ mod keyword_defs;
 use keyword_defs::defs;
 
 fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<LexerToken>> {
-    fn keywords(keywords: &Vec<String>) -> impl Parser<LexerToken, LexerToken, Error = Simple<LexerToken>> {
+    fn keywords(keywords: &HashSet<String>) -> impl Parser<LexerToken, LexerToken, Error = Simple<LexerToken>> {
         fn full_keyword(full_keyword: &str) -> impl Parser<LexerToken, LexerToken, Error = Simple<LexerToken>> {
             let full_split = full_keyword.split(" ").filter(|key| key.len() != 0).collect::<Vec<_>>();
             let mut full_keyword_result: Box<dyn Parser<LexerToken, LexerToken, Error = Simple<LexerToken>>> = Box::new(keyword(full_split[0]));
@@ -45,7 +46,11 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
     });
 
     let assignment_statement =
-        take_until(keywords(&defs().to_be))
+        filter(|token| match token {
+            LexerToken::Text(text) => !defs().to_be.contains(text),
+            _ => false
+        }).repeated().at_least(1)
+        .then(keywords(&defs().to_be))
         .then(filter(|token| match token {
             LexerToken::Text(_) => true,
             _ => false
@@ -132,8 +137,8 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         .map(|_| ast::Statement::Comment);
 
     fn if_statement(statement_parser: Recursive<'_, LexerToken, ast::Statement, Simple<LexerToken>>) -> impl Parser<LexerToken, ast::Statement, Error = Simple<LexerToken>> + '_ {
-        fn to_strings(vector: Vec<&str>) -> Vec<String> {
-            vector.into_iter().map(|s| s.to_string()).collect::<Vec<_>>()
+        fn to_strings(set: HashSet<&str>) -> HashSet<String> {
+            set.into_iter().map(|s| s.to_string()).collect::<HashSet<_>>()
         }
         
         let comma = just(LexerToken::Comma);
@@ -153,7 +158,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
                 ))
             )
             .or(
-                take_until(keywords(&defs().to_be).or(keywords(&to_strings(vec!("want to be like", "wanted to be like", "wants to be like")))))
+                take_until(keywords(&defs().to_be).or(keywords(&to_strings(HashSet::from(["want to be like", "wanted to be like", "wants to be like"])))))
                 .then(take_until(end()))
                 .map(|((lhs, _), (rhs, _))| ast::Condition::EqualTo(
                     ast::VariableOrNumberLiteral(lexer_tokens_to_name(lhs)),
@@ -161,7 +166,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
                 ))
             )
             .or(
-                take_until(keywords(&defs().to_be).ignore_then(keyword("not")).or(keywords(&to_strings(vec!("did not want to be like", "does not want to be like")))))
+                take_until(keywords(&defs().to_be).ignore_then(keyword("not")).or(keywords(&to_strings(HashSet::from(["did not want to be like", "does not want to be like"])))))
                 .then(take_until(end()))
                 .map(|((lhs, _), (rhs, _))| ast::Condition::NotEqualTo(
                     ast::VariableOrNumberLiteral(lexer_tokens_to_name(lhs)),
