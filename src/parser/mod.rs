@@ -8,17 +8,17 @@ pub mod ast;
 
 fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<LexerToken>> {
     let to_be =
-        &["was", "were", "is", "are", "wanted to be like", "wants to be like", "wanted to be like"];
+        &vec!("was", "were", "is", "are", "wanted to be like", "wants to be like", "wanted to be like");
     let positive_adjective =
-        &["good", "great", "awesome", "amazing", "fantastic", "wonderful", "incredible", "nice", "cool", "happy", "joyful", "joyous", "glad", "delighted", "pleased", "satisfied", "content", "cheerful", "merry", "jolly", "jovial", "gleeful", "carefree", "sunny", "elated", "exhilarated", "ecstatic", "euphoric", "overjoyed", "exultant", "rapturous", "blissful", "radiant", "thrilled", "ravished"];
+        &vec!("good", "great", "awesome", "amazing", "fantastic", "wonderful", "incredible", "nice", "cool", "happy", "joyful", "joyous", "glad", "delighted", "pleased", "satisfied", "content", "cheerful", "merry", "jolly", "jovial", "gleeful", "carefree", "sunny", "elated", "exhilarated", "ecstatic", "euphoric", "overjoyed", "exultant", "rapturous", "blissful", "radiant", "thrilled", "ravished");
     let negative_adjective = 
-        &["bad", "terrible", "awful", "horrible", "dreadful", "unpleasant", "unlucky", "displeased", "miserable", "sad", "sorrowful", "dejected", "regretful", "depressed", "downcast", "despondent", "disconsolate", "desolate", "glum", "gloomy", "melancholic", "mournful", "forlorn", "crestfallen", "broken-hearted", "heartbroken", "grief-stricken", "disheartened", "dismayed", "dispirited", "discouraged", "hopeless"];
+        &vec!("bad", "terrible", "awful", "horrible", "dreadful", "unpleasant", "unlucky", "displeased", "miserable", "sad", "sorrowful", "dejected", "regretful", "depressed", "downcast", "despondent", "disconsolate", "desolate", "glum", "gloomy", "melancholic", "mournful", "forlorn", "crestfallen", "broken-hearted", "heartbroken", "grief-stricken", "disheartened", "dismayed", "dispirited", "discouraged", "hopeless");
     let said_keywords =
-        &["said", "stated", "exclaimed", "whispered", "shouted", "mumbled", "replied", "responded", "declared", "announced", "asserted", "acknowledged", "conveyed", "uttered", "ventured", "suggested", "disclosed", "protested", "objected", "interjected", "speculated", "greeted", "quoted", "noted", "mentioned", "alledged", "insisted", "confessed", "recited", "pleaded", "concluded", "inquired", "muttered"];
+        &vec!("said", "stated", "exclaimed", "whispered", "shouted", "mumbled", "replied", "responded", "declared", "announced", "asserted", "acknowledged", "conveyed", "uttered", "ventured", "suggested", "disclosed", "protested", "objected", "interjected", "speculated", "greeted", "quoted", "noted", "mentioned", "alledged", "insisted", "confessed", "recited", "pleaded", "concluded", "inquired", "muttered");
     let goto_keywords =
-        &["go to", "goes to", "went to", "gone to", "going to"];
+        &vec!("go to", "goes to", "went to", "gone to", "going to");
 
-    fn keywords(keywords: &[&str]) -> impl Parser<LexerToken, LexerToken, Error = Simple<LexerToken>> {
+    fn keywords(keywords: &Vec<&str>) -> impl Parser<LexerToken, LexerToken, Error = Simple<LexerToken>> {
         fn full_keyword(full_keyword: &str) -> impl Parser<LexerToken, LexerToken, Error = Simple<LexerToken>> {
             let full_split = full_keyword.split(" ").filter(|key| key.len() != 0).collect::<Vec<_>>();
             let mut full_keyword_result: Box<dyn Parser<LexerToken, LexerToken, Error = Simple<LexerToken>>> = Box::new(keyword(full_split[0]));
@@ -142,9 +142,9 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
 
     fn if_statement(statement_parser: Recursive<'_, LexerToken, ast::Statement, Simple<LexerToken>>) -> impl Parser<LexerToken, ast::Statement, Error = Simple<LexerToken>> + '_ {
         let positive_comparative_adjective =
-            &["better", "greater", "stronger", "larger"];
+            &vec!("better", "greater", "stronger", "larger");
         let negative_comparative_adjective =
-            &["worse", "less", "fewer", "smaller"];
+            &vec!("worse", "less", "fewer", "smaller");
         let comma = just(LexerToken::Comma);
         let condition =
             take_until(keyword("is").or(keyword("felt")).then(keywords(positive_comparative_adjective)).then(keyword("than")))
