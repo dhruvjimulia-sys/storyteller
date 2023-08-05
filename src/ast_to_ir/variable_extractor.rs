@@ -19,7 +19,7 @@ pub fn get_variables(ast: &ast::Program) -> HashSet<ir::Variable> {
                 ast::Statement::PrintNumberStatement(variable) => {
                     variables.insert(ir::Variable(variable.0.clone()));
                 }
-                ast::Statement::PrintCharacterStatement(variable) => {
+                ast::Statement::PrintStringStatement(variable) => {
                     variables.insert(ir::Variable(variable.0.clone()));
                 }
                 ast::Statement::InputStatement(variable) => {

@@ -7,7 +7,7 @@ pub enum Statement {
     AddStatement(Variable, VariableOrNumberLiteral),
     SubStatement(Variable, VariableOrNumberLiteral),
     PrintNumberStatement(Variable),
-    PrintCharacterStatement(Variable),
+    PrintStringStatement(Variable),
     InputStatement(Variable),
     ExitStatement,
     GotoStatement(VariableOrNumberLiteral),
@@ -33,3 +33,23 @@ pub struct Variable(pub String);
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct VariableOrNumberLiteral(pub String);
+
+pub trait ASTExpression {
+    fn get_name(self) -> String;
+}
+
+impl ASTExpression for Variable {
+    fn get_name(self) -> String {
+        match self {
+            Variable(name) => { name }
+        }
+    }
+}
+
+impl ASTExpression for VariableOrNumberLiteral {
+    fn get_name(self) -> String {
+        match self {
+            VariableOrNumberLiteral(name) => { name }
+        }
+    }
+}

@@ -14,3 +14,8 @@ pub const ILLEGAL_ARGUMENT_ERROR: Error = Error {
     error_type: "Enigmatic Whispers Error",
     error_message: "Listen closely, brave programmer, for the cryptic whispers of your command-line summons are incomprehensible even to the wise compiler. Alas, the words you offer are but echoes of disarray. Invoke your commands with precision to unravel the mysteries your story can offer."
 };
+
+pub const PRONOUN_NO_ANTECEDENT_ERROR: Error = Error {
+    error_type: "Lonely Pronoun Error",
+    error_message: "Oh, the tragedy that has befallen us! A forlorn pronoun meanders aimlessly, searching for its lost noun companion. Alas, it finds itself adrift in a sea of ambiguity, yearning for connection."
+};

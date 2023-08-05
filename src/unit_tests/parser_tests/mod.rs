@@ -114,7 +114,7 @@ fn parser_correctly_parses_print_character_statement() {
 
     assert_eq!(ast, ast::Program(vec![ast::Block(
         vec![
-            ast::Statement::PrintCharacterStatement(
+            ast::Statement::PrintStringStatement(
                 ast::Variable("charlie".to_string())
             )
         ]

@@ -105,7 +105,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         .ignore_then(quote.clone()
         .ignore_then(take_until(keywords(said_keywords)))
         .then_ignore(adverb_keyword.clone())))
-        .map(|(number, _)| ast::Statement::PrintCharacterStatement(
+        .map(|(number, _)| ast::Statement::PrintStringStatement(
             ast::Variable(lexer_tokens_to_name(number))
         ));
 
