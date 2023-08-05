@@ -5,20 +5,11 @@ use crate::lexer::lexer_types::{LexerOutput, LexerToken};
 use crate::errors::Error;
 use crate::errors::compiler_errors;
 pub mod ast;
+mod keyword_defs;
+use keyword_defs::defs;
 
 fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<LexerToken>> {
-    let to_be =
-        &vec!("was", "were", "is", "are", "wanted to be like", "wants to be like", "wanted to be like");
-    let positive_adjective =
-        &vec!("good", "great", "awesome", "amazing", "fantastic", "wonderful", "incredible", "nice", "cool", "happy", "joyful", "joyous", "glad", "delighted", "pleased", "satisfied", "content", "cheerful", "merry", "jolly", "jovial", "gleeful", "carefree", "sunny", "elated", "exhilarated", "ecstatic", "euphoric", "overjoyed", "exultant", "rapturous", "blissful", "radiant", "thrilled", "ravished");
-    let negative_adjective = 
-        &vec!("bad", "terrible", "awful", "horrible", "dreadful", "unpleasant", "unlucky", "displeased", "miserable", "sad", "sorrowful", "dejected", "regretful", "depressed", "downcast", "despondent", "disconsolate", "desolate", "glum", "gloomy", "melancholic", "mournful", "forlorn", "crestfallen", "broken-hearted", "heartbroken", "grief-stricken", "disheartened", "dismayed", "dispirited", "discouraged", "hopeless");
-    let said_keywords =
-        &vec!("said", "stated", "exclaimed", "whispered", "shouted", "mumbled", "replied", "responded", "declared", "announced", "asserted", "acknowledged", "conveyed", "uttered", "ventured", "suggested", "disclosed", "protested", "objected", "interjected", "speculated", "greeted", "quoted", "noted", "mentioned", "alledged", "insisted", "confessed", "recited", "pleaded", "concluded", "inquired", "muttered");
-    let goto_keywords =
-        &vec!("go to", "goes to", "went to", "gone to", "going to");
-
-    fn keywords(keywords: &Vec<&str>) -> impl Parser<LexerToken, LexerToken, Error = Simple<LexerToken>> {
+    fn keywords(keywords: &Vec<String>) -> impl Parser<LexerToken, LexerToken, Error = Simple<LexerToken>> {
         fn full_keyword(full_keyword: &str) -> impl Parser<LexerToken, LexerToken, Error = Simple<LexerToken>> {
             let full_split = full_keyword.split(" ").filter(|key| key.len() != 0).collect::<Vec<_>>();
             let mut full_keyword_result: Box<dyn Parser<LexerToken, LexerToken, Error = Simple<LexerToken>>> = Box::new(keyword(full_split[0]));
@@ -28,7 +19,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
             full_keyword_result
         }
 
-        let keywords = keywords.iter().unique().collect::<Vec<_>>();
+        let keywords = keywords.iter().map(|s| s.as_str()).unique().collect::<Vec<_>>();
         let mut result: Box<dyn Parser<LexerToken, LexerToken, Error = Simple<LexerToken>>> = Box::new(full_keyword(keywords[0]));
         for i in 1..keywords.len() {
             result = Box::new(result.or(full_keyword(keywords[i])));
@@ -54,7 +45,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
     });
 
     let assignment_statement =
-        take_until(keywords(to_be))
+        take_until(keywords(&defs().to_be))
         .then(filter(|token| match token {
             LexerToken::Text(_) => true,
             _ => false
@@ -68,7 +59,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
     let addition_statement =
         take_until(keyword("felt"))
         .then_ignore(keyword("as"))
-        .then_ignore(keywords(positive_adjective))
+        .then_ignore(keywords(&defs().positive_adjective))
         .then_ignore(keyword("as"))
         .then(take_until(end()))
         .map(|((a, _), (b, _))| ast::Statement::AddStatement(
@@ -79,7 +70,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
     let subtraction_statement =
         take_until(keyword("felt"))
         .then_ignore(keyword("as"))
-        .then_ignore(keywords(negative_adjective))
+        .then_ignore(keywords(&defs().negative_adjective))
         .then_ignore(keyword("as"))
         .then(take_until(end()))
         .map(|((a, _), (b, _))| ast::Statement::SubStatement(
@@ -94,7 +85,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
     let print_number_statement =
         quote.clone()
         .ignore_then(inner_quote.clone()
-        .ignore_then(quote.clone().ignore_then(take_until(keywords(said_keywords)))))
+        .ignore_then(quote.clone().ignore_then(take_until(keywords(&defs().said)))))
         .map(|(number, _)| ast::Statement::PrintNumberStatement(
             ast::Variable(lexer_tokens_to_name(number)))
         );
@@ -103,7 +94,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         quote.clone()
         .ignore_then(inner_quote.clone()
         .ignore_then(quote.clone()
-        .ignore_then(take_until(keywords(said_keywords)))
+        .ignore_then(take_until(keywords(&defs().said)))
         .then_ignore(adverb_keyword.clone())))
         .map(|(number, _)| ast::Statement::PrintStringStatement(
             ast::Variable(lexer_tokens_to_name(number))
@@ -126,7 +117,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         ));
 
     let goto_statement =
-        take_until(keywords(goto_keywords))
+        take_until(keywords(&defs().goto))
         .ignore_then(take_until(end()))
         .map(|(name, _)| ast::Statement::GotoStatement(
             ast::VariableOrNumberLiteral(lexer_tokens_to_name(name))
@@ -141,20 +132,20 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         .map(|_| ast::Statement::Comment);
 
     fn if_statement(statement_parser: Recursive<'_, LexerToken, ast::Statement, Simple<LexerToken>>) -> impl Parser<LexerToken, ast::Statement, Error = Simple<LexerToken>> + '_ {
-        let positive_comparative_adjective =
-            &vec!("better", "greater", "stronger", "larger");
-        let negative_comparative_adjective =
-            &vec!("worse", "less", "fewer", "smaller");
+        fn to_strings(vector: Vec<&str>) -> Vec<String> {
+            vector.into_iter().map(|s| s.to_string()).collect::<Vec<_>>()
+        }
+        
         let comma = just(LexerToken::Comma);
         let condition =
-            take_until(keyword("is").or(keyword("felt")).then(keywords(positive_comparative_adjective)).then(keyword("than")))
+            take_until(keywords(&defs().to_be).or(keyword("felt")).then(keywords(&defs().positive_comparative_adjective)).then(keyword("than")))
             .then(take_until(end()))
             .map(|((lhs, _), (rhs, _))| ast::Condition::GreaterThan(
                 ast::VariableOrNumberLiteral(lexer_tokens_to_name(lhs)),
                 ast::VariableOrNumberLiteral(lexer_tokens_to_name(rhs))
             ))
             .or(
-                take_until(keyword("is").or(keyword("felt")).then(keywords(negative_comparative_adjective)).then(keyword("than")))
+                take_until(keywords(&defs().to_be).or(keyword("felt")).then(keywords(&defs().negative_comparative_adjective)).then(keyword("than")))
                 .then(take_until(end()))
                 .map(|((lhs, _), (rhs, _))| ast::Condition::LessThan(
                     ast::VariableOrNumberLiteral(lexer_tokens_to_name(lhs)),
@@ -162,7 +153,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
                 ))
             )
             .or(
-                take_until(keyword("is").or(keywords(&vec!("want to be like", "wanted to be like", "wants to be like"))))
+                take_until(keywords(&defs().to_be).or(keywords(&to_strings(vec!("want to be like", "wanted to be like", "wants to be like")))))
                 .then(take_until(end()))
                 .map(|((lhs, _), (rhs, _))| ast::Condition::EqualTo(
                     ast::VariableOrNumberLiteral(lexer_tokens_to_name(lhs)),
@@ -170,7 +161,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
                 ))
             )
             .or(
-                take_until(keyword("is").ignore_then(keyword("not")).or(keywords(&vec!("did not want to be like", "does not want to be like"))))
+                take_until(keywords(&defs().to_be).ignore_then(keyword("not")).or(keywords(&to_strings(vec!("did not want to be like", "does not want to be like")))))
                 .then(take_until(end()))
                 .map(|((lhs, _), (rhs, _))| ast::Condition::NotEqualTo(
                     ast::VariableOrNumberLiteral(lexer_tokens_to_name(lhs)),

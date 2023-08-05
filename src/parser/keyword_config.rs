@@ -1,4 +1,0 @@
-
-struct keyword_config {
-    
-}
