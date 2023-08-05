@@ -28,7 +28,5 @@ pub enum Condition {
     EqualTo(Expression, Expression),
     NotEqualTo(Expression, Expression),
     GreaterThan(Expression, Expression),
-    LessThan(Expression, Expression),
-    GreaterThanOrEqualTo(Expression, Expression),
-    LessThanOrEqualTo(Expression, Expression)
+    LessThan(Expression, Expression)
 }

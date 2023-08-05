@@ -21,8 +21,6 @@ pub enum Condition {
     NotEqualTo(VariableOrNumberLiteral, VariableOrNumberLiteral),
     GreaterThan(VariableOrNumberLiteral, VariableOrNumberLiteral),
     LessThan(VariableOrNumberLiteral, VariableOrNumberLiteral),
-    GreaterThanOrEqualTo(VariableOrNumberLiteral, VariableOrNumberLiteral),
-    LessThanOrEqualTo(VariableOrNumberLiteral, VariableOrNumberLiteral)
 }
 
 #[derive(Debug, PartialEq)]

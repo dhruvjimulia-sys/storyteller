@@ -65,16 +65,6 @@ pub fn replace_pronouns(ast: &ast::Program, variables: &HashSet<ir::Variable>) -
                 let (rhs_pronoun_replacement, new_curr_var) = replace_pronoun_in_var_or_num_literal(rhs, new_curr_var, &pronouns, variables);
                 (ast::Condition::GreaterThan(lhs_pronoun_replacement, rhs_pronoun_replacement), new_curr_var)
             },
-            ast::Condition::GreaterThanOrEqualTo(lhs, rhs) => {
-                let (lhs_pronoun_replacement, new_curr_var) = replace_pronoun_in_var_or_num_literal(lhs, curr, &pronouns, variables);
-                let (rhs_pronoun_replacement, new_curr_var) = replace_pronoun_in_var_or_num_literal(rhs, new_curr_var, &pronouns, variables);
-                (ast::Condition::GreaterThanOrEqualTo(lhs_pronoun_replacement, rhs_pronoun_replacement), new_curr_var)
-            },
-            ast::Condition::LessThanOrEqualTo(lhs, rhs) => {
-                let (lhs_pronoun_replacement, new_curr_var) = replace_pronoun_in_var_or_num_literal(lhs, curr, &pronouns, variables);
-                let (rhs_pronoun_replacement, new_curr_var) = replace_pronoun_in_var_or_num_literal(rhs, new_curr_var, &pronouns, variables);
-                (ast::Condition::LessThanOrEqualTo(lhs_pronoun_replacement, rhs_pronoun_replacement), new_curr_var)
-            },
             ast::Condition::LessThan(lhs, rhs) => {
                 let (lhs_pronoun_replacement, new_curr_var) = replace_pronoun_in_var_or_num_literal(lhs, curr, &pronouns, variables);
                 let (rhs_pronoun_replacement, new_curr_var) = replace_pronoun_in_var_or_num_literal(rhs, new_curr_var, &pronouns, variables);

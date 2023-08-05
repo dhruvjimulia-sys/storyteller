@@ -78,12 +78,6 @@ fn condition_to_ir(condition: &ast::Condition, variables: &HashSet<ir::Variable>
         ast::Condition::LessThan(ref lhs, ref rhs) => {
             ir::Condition::LessThan(replace_if_poetic_literal(lhs.clone(), &variables), replace_if_poetic_literal(rhs.clone(), &variables))
         }
-        ast::Condition::GreaterThanOrEqualTo(ref lhs, ref rhs) => {
-            ir::Condition::GreaterThanOrEqualTo(replace_if_poetic_literal(lhs.clone(), &variables), replace_if_poetic_literal(rhs.clone(), &variables))
-        }
-        ast::Condition::LessThanOrEqualTo(ref lhs, ref rhs) => {
-            ir::Condition::LessThanOrEqualTo(replace_if_poetic_literal(lhs.clone(), &variables), replace_if_poetic_literal(rhs.clone(), &variables))
-        }
     }
 }
 

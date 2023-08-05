@@ -160,6 +160,22 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
                     ast::VariableOrNumberLiteral(lexer_tokens_to_name(lhs)),
                     ast::VariableOrNumberLiteral(lexer_tokens_to_name(rhs))
                 ))
+            )
+            .or(
+                take_until(keyword("is").or(keywords(&vec!("want to be like", "wanted to be like", "wants to be like"))))
+                .then(take_until(end()))
+                .map(|((lhs, _), (rhs, _))| ast::Condition::EqualTo(
+                    ast::VariableOrNumberLiteral(lexer_tokens_to_name(lhs)),
+                    ast::VariableOrNumberLiteral(lexer_tokens_to_name(rhs))
+                ))
+            )
+            .or(
+                take_until(keyword("is").ignore_then(keyword("not")).or(keywords(&vec!("did not want to be like", "does not want to be like"))))
+                .then(take_until(end()))
+                .map(|((lhs, _), (rhs, _))| ast::Condition::NotEqualTo(
+                    ast::VariableOrNumberLiteral(lexer_tokens_to_name(lhs)),
+                    ast::VariableOrNumberLiteral(lexer_tokens_to_name(rhs))
+                ))
             );
 
         keyword("if")

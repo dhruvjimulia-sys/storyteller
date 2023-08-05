@@ -65,12 +65,6 @@ fn evaluate_condition(condition: &ir::Condition, variable_values: &mut HashMap<V
         ir::Condition::LessThan(lhs, rhs) => {
             get_expression_value(lhs, variable_values) < get_expression_value(rhs, variable_values)
         }
-        ir::Condition::GreaterThanOrEqualTo(lhs, rhs) => {
-            get_expression_value(lhs, variable_values) >= get_expression_value(rhs, variable_values)
-        }
-        ir::Condition::LessThanOrEqualTo(lhs, rhs) => {
-            get_expression_value(lhs, variable_values) <= get_expression_value(rhs, variable_values)
-        }
     }
 }
 
