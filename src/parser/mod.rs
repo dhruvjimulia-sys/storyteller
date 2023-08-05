@@ -62,10 +62,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
     let assignment_statement =
         text_tokens_except(defs().to_be, 1)
         .then_ignore(keywords(&defs().to_be))
-        .then(filter(|token| match token {
-            LexerToken::Text(_) => true,
-            _ => false
-        }).repeated())
+        .then(text_tokens(1))
         .then_ignore(end())
         .map(|(a, b)| ast::Statement::AssignmentStatement(
             ast::Variable(lexer_tokens_to_name(a)),
@@ -79,6 +76,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         .then_ignore(keywords(&defs().positive_adjective))
         .then_ignore(keyword("as"))
         .then(text_tokens(1))
+        .then_ignore(end())
         .map(|(a, b)| ast::Statement::AddStatement(
             ast::Variable(lexer_tokens_to_name(a)),
             ast::VariableOrNumberLiteral(lexer_tokens_to_name(b))
@@ -91,6 +89,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         .then_ignore(keywords(&defs().negative_adjective))
         .then_ignore(keyword("as"))
         .then(text_tokens(1))
+        .then_ignore(end())
         .map(|(a, b)| ast::Statement::SubStatement(
             ast::Variable(lexer_tokens_to_name(a)),
             ast::VariableOrNumberLiteral(lexer_tokens_to_name(b))
@@ -107,6 +106,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
             text_tokens_except(defs().said, 1)
             .then_ignore(keywords(&defs().said))
         )))
+        .then_ignore(end())
         .map(|number| ast::Statement::PrintNumberStatement(
             ast::Variable(lexer_tokens_to_name(number)))
         );
@@ -120,6 +120,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
             .then_ignore(keywords(&defs().said)
         ))
         .then_ignore(adverb_keyword.clone())))
+        .then_ignore(end())
         .map(|number| ast::Statement::PrintStringStatement(
             ast::Variable(lexer_tokens_to_name(number))
         ));
@@ -139,6 +140,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         .then_ignore(keyword("for"))
         .then_ignore(keyword("an"))
         .then_ignore(keyword("answer"))
+        .then_ignore(end())
         .map(|name| ast::Statement::InputStatement(
             ast::Variable(lexer_tokens_to_name(name))
         ));
@@ -147,12 +149,15 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         text_tokens_except(defs().goto, 0)
         .ignore_then(keywords(&defs().goto))
         .ignore_then(text_tokens(1))
+        .then_ignore(end())
         .map(|name| ast::Statement::GotoStatement(
             ast::VariableOrNumberLiteral(lexer_tokens_to_name(name))
         ));
 
     let exit_statement =
         take_until(keyword("end"))
+        .ignore_then(any().repeated())
+        .then_ignore(end())
         .map(|_| ast::Statement::ExitStatement);
 
     let comment =
