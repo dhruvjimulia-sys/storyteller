@@ -119,7 +119,7 @@ fn interpret_instruction(ir: &Vec<ir::Instruction>, instruction: &ir::Instructio
             variable_values.insert(variable.clone(), num_input);
         }
         ir::Instruction::ExitInstruction => {
-            return;
+            std::process::exit(0);
         }
         ir::Instruction::GotoInstruction(expression) => {
             let new_instruction_pointer = match labels.get(

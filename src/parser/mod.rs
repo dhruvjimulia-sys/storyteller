@@ -204,22 +204,23 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
             )
             .or(
                 text_tokens_except(condition_start_tokens.clone(), 1)
-                .then_ignore(equal_to_condition)
-                .then(text_tokens(1))
-                .map(|(lhs, rhs)| ast::Condition::EqualTo(
-                    ast::VariableOrNumberLiteral(lexer_tokens_to_name(lhs)),
-                    ast::VariableOrNumberLiteral(lexer_tokens_to_name(rhs))
-                ))
-            )
-            .or(
-                text_tokens_except(condition_start_tokens, 1)
                 .then_ignore(not_equal_to_condition)
                 .then(text_tokens(1))
                 .map(|(lhs, rhs)| ast::Condition::NotEqualTo(
                     ast::VariableOrNumberLiteral(lexer_tokens_to_name(lhs)),
                     ast::VariableOrNumberLiteral(lexer_tokens_to_name(rhs))
                 ))
+            )
+            .or(
+                text_tokens_except(condition_start_tokens, 1)
+                .then_ignore(equal_to_condition)
+                .then(text_tokens(1))
+                .map(|(lhs, rhs)| ast::Condition::EqualTo(
+                    ast::VariableOrNumberLiteral(lexer_tokens_to_name(lhs)),
+                    ast::VariableOrNumberLiteral(lexer_tokens_to_name(rhs))
+                ))
             );
+            
 
         keyword("if")
         .ignore_then(text_tokens(1))
