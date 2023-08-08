@@ -12,7 +12,7 @@ pub struct KeywordDefs {
     pub negative_comparative_adjective: HashSet<String>
 }
 
-fn create_string_set_from_file(file_path: &str) -> HashSet<String> {
+fn get_keywords_from_file(file_path: &str) -> HashSet<String> {
     let file = File::open(file_path).unwrap();
     let reader = BufReader::new(file);
 
@@ -25,17 +25,14 @@ fn create_string_set_from_file(file_path: &str) -> HashSet<String> {
     string_set
 }
 
-pub fn defs() -> KeywordDefs {
-    fn to_strings(set: HashSet<&str>) -> HashSet<String> {
-        set.into_iter().map(|s| s.to_string()).collect::<HashSet<_>>()
-    }
+pub fn get_keyword_defs() -> KeywordDefs {
     KeywordDefs {
-        to_be: create_string_set_from_file("keywords/to_be_keywords.txt"),
-        positive_adjective: to_strings(HashSet::from(["good", "great", "awesome", "amazing", "fantastic", "wonderful", "incredible", "nice", "cool", "happy", "joyful", "joyous", "glad", "delighted", "pleased", "satisfied", "content", "cheerful", "merry", "jolly", "jovial", "gleeful", "carefree", "sunny", "elated", "exhilarated", "ecstatic", "euphoric", "overjoyed", "exultant", "rapturous", "blissful", "radiant", "thrilled", "ravished"])),
-        negative_adjective: to_strings(HashSet::from(["bad", "terrible", "awful", "horrible", "dreadful", "unpleasant", "unlucky", "displeased", "miserable", "sad", "sorrowful", "dejected", "regretful", "depressed", "downcast", "despondent", "disconsolate", "desolate", "glum", "gloomy", "melancholic", "mournful", "forlorn", "crestfallen", "broken-hearted", "heartbroken", "grief-stricken", "disheartened", "dismayed", "dispirited", "discouraged", "hopeless"])),
-        said: to_strings(HashSet::from(["said", "stated", "exclaimed", "whispered", "shouted", "mumbled", "replied", "responded", "declared", "announced", "asserted", "acknowledged", "conveyed", "uttered", "ventured", "suggested", "disclosed", "protested", "objected", "interjected", "speculated", "greeted", "quoted", "noted", "mentioned", "alledged", "insisted", "confessed", "recited", "pleaded", "concluded", "inquired", "muttered"])),
-        goto: to_strings(HashSet::from(["go to", "goes to", "went to", "gone to", "going to"])),
-        positive_comparative_adjective: to_strings(HashSet::from(["better", "greater", "stronger", "larger"])),
-        negative_comparative_adjective: to_strings(HashSet::from(["worse", "less", "fewer", "smaller"]))
+        to_be: get_keywords_from_file("keywords/to_be_keywords.txt"),
+        positive_adjective: get_keywords_from_file("keywords/positive_adjective_keywords.txt"),
+        negative_adjective: get_keywords_from_file("keywords/negative_adjective_keywords.txt"),
+        said: get_keywords_from_file("keywords/said_keywords.txt"),
+        goto: get_keywords_from_file("keywords/goto_keywords.txt"),
+        positive_comparative_adjective: get_keywords_from_file("keywords/positive_comparative_adjective_keywords.txt"),
+        negative_comparative_adjective: get_keywords_from_file("keywords/negative_comparative_adjective_keywords.txt")
     }
 }
