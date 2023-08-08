@@ -6,10 +6,9 @@ use crate::lexer::lexer_types::{LexerOutput, LexerToken};
 use crate::errors::Error;
 use crate::errors::compiler_errors;
 pub mod ast;
-mod keyword_defs;
-use keyword_defs::defs;
+use crate::keyword_defs::KeywordDefs;
 
-fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<LexerToken>> {
+fn statement_parser(keyword_defs: &KeywordDefs) -> impl Parser<LexerToken, ast::Statement, Error = Simple<LexerToken>> {
     fn keywords(keywords: &HashSet<String>) -> impl Parser<LexerToken, LexerToken, Error = Simple<LexerToken>> {
         fn full_keyword(full_keyword: &str) -> impl Parser<LexerToken, LexerToken, Error = Simple<LexerToken>> {
             let full_split = full_keyword.split(" ").filter(|key| key.len() != 0).collect::<Vec<_>>();
@@ -61,8 +60,8 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
     });
 
     let assignment_statement =
-        text_tokens_except(defs().to_be, 1)
-        .then_ignore(keywords(&defs().to_be))
+        text_tokens_except(keyword_defs.to_be.clone(), 1)
+        .then_ignore(keywords(&keyword_defs.to_be))
         .then(text_tokens(1))
         .then_ignore(optional_surbodinate_clause.clone())
         .then_ignore(end())
@@ -75,7 +74,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         text_tokens_except(HashSet::from(["felt".to_string()]), 1)
         .then_ignore(keyword("felt"))
         .then_ignore(keyword("as"))
-        .then_ignore(keywords(&defs().positive_adjective))
+        .then_ignore(keywords(&keyword_defs.positive_adjective))
         .then_ignore(keyword("as"))
         .then(text_tokens(1))
         .then_ignore(optional_surbodinate_clause.clone())
@@ -89,7 +88,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         text_tokens_except(HashSet::from(["felt".to_string()]), 1)
         .then_ignore(keyword("felt"))
         .then_ignore(keyword("as"))
-        .then_ignore(keywords(&defs().negative_adjective))
+        .then_ignore(keywords(&keyword_defs.negative_adjective))
         .then_ignore(keyword("as"))
         .then(text_tokens(1))
         .then_ignore(optional_surbodinate_clause.clone())
@@ -107,8 +106,8 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         quote.clone()
         .ignore_then(inner_quote.clone()
         .ignore_then(quote.clone().ignore_then(
-            text_tokens_except(defs().said, 1)
-            .then_ignore(keywords(&defs().said))
+            text_tokens_except(keyword_defs.said.clone(), 1)
+            .then_ignore(keywords(&keyword_defs.said))
         )))
         .then_ignore(optional_surbodinate_clause.clone())
         .then_ignore(end())
@@ -121,8 +120,8 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         .ignore_then(inner_quote.clone()
         .ignore_then(quote.clone()
         .ignore_then(
-            text_tokens_except(defs().said, 1)
-            .then_ignore(keywords(&defs().said)
+            text_tokens_except(keyword_defs.said.clone(), 1)
+            .then_ignore(keywords(&keyword_defs.said)
         ))
         .then_ignore(adverb_keyword.clone())))
         .then_ignore(optional_surbodinate_clause.clone())
@@ -153,8 +152,8 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         ));
 
     let goto_statement =
-        text_tokens_except(defs().goto, 0)
-        .ignore_then(keywords(&defs().goto))
+        text_tokens_except(keyword_defs.goto.clone(), 0)
+        .ignore_then(keywords(&keyword_defs.goto))
         .ignore_then(text_tokens(1))
         .then_ignore(optional_surbodinate_clause)
         .then_ignore(end())
@@ -172,18 +171,18 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
         take_until(end())
         .map(|_| ast::Statement::Comment);
 
-    fn if_statement(statement_parser: Recursive<'_, LexerToken, ast::Statement, Simple<LexerToken>>) -> impl Parser<LexerToken, ast::Statement, Error = Simple<LexerToken>> + '_ {
+    fn if_statement<'a>(statement_parser: Recursive<'a, LexerToken, ast::Statement, Simple<LexerToken>>, keyword_defs: &KeywordDefs) -> impl Parser<LexerToken, ast::Statement, Error = Simple<LexerToken>> + 'a {
         fn to_strings(set: HashSet<&str>) -> HashSet<String> {
             set.into_iter().map(|s| s.to_string()).collect::<HashSet<_>>()
         }
         
         let comma = just(LexerToken::Comma);
         let optional_surbodinate_clause = just(LexerToken::Comma).then(any::<LexerToken, Simple<LexerToken>>().repeated()).or_not();
-        let greater_than_condition = keywords(&defs().to_be).or(keyword("felt")).then(keywords(&defs().positive_comparative_adjective)).then(keyword("than"));
-        let less_than_condition = keywords(&defs().to_be).or(keyword("felt")).then(keywords(&defs().negative_comparative_adjective)).then(keyword("than"));
-        let equal_to_condition = keywords(&defs().to_be).or(keywords(&to_strings(HashSet::from(["want to be like", "wanted to be like", "wants to be like"])))); 
-        let not_equal_to_condition = keywords(&defs().to_be).ignore_then(keyword("not")).or(keywords(&to_strings(HashSet::from(["did not want to be like", "does not want to be like"])))); 
-        let condition_start_tokens = defs().to_be.clone().into_iter().chain(vec!["felt".to_string()]).collect::<HashSet<_>>(); 
+        let greater_than_condition = keywords(&keyword_defs.to_be).or(keyword("felt")).then(keywords(&keyword_defs.positive_comparative_adjective)).then(keyword("than"));
+        let less_than_condition = keywords(&keyword_defs.to_be).or(keyword("felt")).then(keywords(&keyword_defs.negative_comparative_adjective)).then(keyword("than"));
+        let equal_to_condition = keywords(&keyword_defs.to_be).or(keywords(&to_strings(HashSet::from(["want to be like", "wanted to be like", "wants to be like"])))); 
+        let not_equal_to_condition = keywords(&keyword_defs.to_be).ignore_then(keyword("not")).or(keywords(&to_strings(HashSet::from(["did not want to be like", "does not want to be like"])))); 
+        let condition_start_tokens = keyword_defs.to_be.clone().into_iter().chain(vec!["felt".to_string()]).collect::<HashSet<_>>(); 
         
         let condition =
             text_tokens_except(condition_start_tokens.clone(), 1)
@@ -236,7 +235,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
     }
 
     let statement = recursive(|statement| {
-        if_statement(statement)
+        if_statement(statement, keyword_defs)
         .or(input_statement)
         .or(print_string_statement)
         .or(print_number_statement)
@@ -251,7 +250,7 @@ fn statement_parser() -> impl Parser<LexerToken, ast::Statement, Error = Simple<
     statement
 }
 
-fn statement_block_parser() -> impl Parser<LexerToken, ast::Block, Error = Simple<LexerToken>> {
+fn statement_block_parser(keyword_defs: &KeywordDefs) -> impl Parser<LexerToken, ast::Block, Error = Simple<LexerToken>> + '_ {
     let sentence_end_punctuation = just(LexerToken::Period)
         .or(just(LexerToken::QuestionMark))
         .or(just(LexerToken::ExclamationMark));
@@ -267,16 +266,16 @@ fn statement_block_parser() -> impl Parser<LexerToken, ast::Block, Error = Simpl
             ast::Block(statements.into_iter()
             .filter(|statement| !statement.is_empty())
             .map(|statement| {
-                statement_parser().parse(statement).unwrap()
+                statement_parser(keyword_defs).parse(statement).unwrap()
             }).collect())
         });
     block_parser
 }
 
-pub fn parse_program(input: LexerOutput) -> Result<ast::Program, Vec<Error>> {
+pub fn parse_program(input: LexerOutput, keywords: KeywordDefs) -> Result<ast::Program, Vec<Error>> {
     let mut errors = vec![];
     let program = ast::Program(input.0.into_iter().map(|block| {
-        let parsed_block = match statement_block_parser().parse(block.0.clone()) {
+        let parsed_block = match statement_block_parser(&keywords).parse(block.0.clone()) {
             Ok(s) => s,
             Err(_) =>  {
                 errors.push(compiler_errors::unfinished_thought_error());

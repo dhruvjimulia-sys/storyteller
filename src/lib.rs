@@ -8,6 +8,7 @@ mod ast_to_ir;
 mod interpreter;
 #[macro_use]
 pub mod errors;
+mod keyword_defs;
 use errors::compiler_errors;
 
 pub fn interpret(file_name: String, input_stream: &mut dyn std::io::BufRead, output_stream: &mut dyn Write) {
@@ -17,7 +18,8 @@ pub fn interpret(file_name: String, input_stream: &mut dyn std::io::BufRead, out
     };
     let lexer_output = lexer::lexer().parse(file_contents).expect("Lexer Error");
     let preprocessed_lexer_output = preprocessor::preprocess(lexer_output);
-    let ast = match parser::parse_program(preprocessed_lexer_output) {
+    let keywords = keyword_defs::defs();
+    let ast = match parser::parse_program(preprocessed_lexer_output, keywords) {
         Ok(ast) => ast,
         Err(errors) => { errors.into_iter().for_each(|err| err.display()); return; }
     };
