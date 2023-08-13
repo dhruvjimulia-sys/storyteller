@@ -115,7 +115,7 @@ pub fn replace_pronouns(ast: &ast::Program, variables: &HashSet<ir::Variable>) -
         }
     }
 
-    let pronouns = HashSet::from(["he", "she", "they", "him", "her", "them", "himself", "herself", "themself", "themselves"]);
+    let pronouns = HashSet::from(["he", "she", "they", "him", "her", "them", "ze", "hir", "zie", "zir", "xe", "xem", "ve", "ver"]);
     let mut curr_var: Option<ast::Variable> = None;
     ast::Program(ast.0.iter().map(|block| {
         ast::Block(block.0.iter().map(|statement| {
