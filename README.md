@@ -17,7 +17,9 @@ However, in order to use Storyteller in high-performance, low-latency applicatio
 The resulting C file can then be compiled to assembly using a C compiler like `gcc` or `clang`.
 
 ### Learning Storyteller
-The Storyteller Language Reference can be found [here](https://github.com/dhruvjimulia-sys/storyteller/wiki/The-Storyteller-Language-Specification). For an example of a Storyteller program, you can look at the following [FizzBuzz program](https://github.com/dhruvjimulia-sys/storyteller/blob/main/examples/advanced/fizzbuzz.story), designed to look like the intense, riveting story of Cindrella.
+Currently, the best resource to learn the Storyteller language is the [Storyteller Language Reference](https://github.com/dhruvjimulia-sys/storyteller/wiki/The-Storyteller-Language-Specification).
+
+For an example of a Storyteller program, you can look at the following [FizzBuzz program](https://github.com/dhruvjimulia-sys/storyteller/blob/main/examples/advanced/fizzbuzz.story), designed to look like the intense, riveting story of Cinderella.
 
 ### Build From Source
 In order to build the compiler from source, you would need `cargo`, the Rust package manager. The current version of `cargo` used is `v1.70.0`.
