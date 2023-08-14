@@ -1,61 +1,50 @@
+mod codegen_utils;
 use std::collections::HashSet;
-
 use num::BigUint;
-
 use crate::ast_to_ir::ir::{self, Instruction};
+
 
 pub fn convert_ir_to_c(ir: Vec<ir::Instruction>, variables: HashSet<ir::Variable>) -> String {
     let mut c_code = String::new();
-    c_code.push_str("#include <stdio.h>\n");
-    c_code.push_str("#include <stdlib.h>\n");
-    c_code.push_str("#include <string.h>\n");
-    c_code.push_str(get_goto_macro(&ir).as_str());
-    c_code.push_str("long long int string_to_number(char *string) {
-        long long int result = 0;
-        for (int i = strlen(string) - 1; i >= 0; i--) {
-            result = result * 1000 + string[i];
-        }
-        return result;
-    }\n");
-    c_code.push_str("long long int number_to_string(long long int number, char* output) {
-        long long int i = 0;
-        while (number > 0) {
-            output[i] = (number % 1000) % 128;
-            number /= 1000;
-            i++;
-        }
-        output[i] = '\\0';
-        return i;
-    }\n");
-    c_code.push_str("void get_input(char *input, int bufferSize) {
-        long long int index = 0; 
-        long long int ch;
-        while ((ch = getchar()) != '\\n' && ch != EOF) {
-            if (index >= bufferSize - 1) {
-                bufferSize *= 2;
-                char *newInput = (char *) realloc (input, bufferSize * sizeof(char));
-                if (newInput == NULL) {
-                    printf(\"Memory reallocation failed\\n\");
-                    free(input);
-                    exit(1);
-                }
-                input = newInput;
-            }
-            input[index] = ch;
-            index++;
-        }
-        input[index] = '\\0';   
-    }");
-    c_code.push_str("int main() {\n");
-    c_code.push_str("char *input;\n");
-    c_code.push_str("char *output;\n");
-    c_code.push_str("int bufferSize;\n");
-    variables.iter().for_each(|var| c_code.push_str(format!("long long int {} = 0;\n", ir_variable_to_c_variable(var)).as_str()));
+    generate_imports(&mut c_code);
+    generate_macros(&mut c_code, &ir);
+    codegen_utils::generate_helper_functions(&mut c_code);
+    generate_main_function(&mut c_code, variables, ir);
+    c_code
+}
+
+fn generate_main_function(c_code: &mut String, variables: HashSet<ir::Variable>, ir: Vec<Instruction>) {
+    generate_main_scope_entry(c_code);
+    generate_variable_initializations(c_code, variables);
     for instruction in ir {
         c_code.push_str(&instruction_to_c(instruction));
     }
+    generate_scope_exit(c_code);
+}
+
+fn generate_scope_exit(c_code: &mut String) {
     c_code.push_str("}");
-    c_code
+}
+
+fn generate_main_scope_entry(c_code: &mut String) {
+    c_code.push_str("int main() {\n");
+}
+
+fn generate_macros(c_code: &mut String, ir: &Vec<Instruction>) {
+    c_code.push_str(get_goto_macro(ir).as_str());
+}
+
+fn generate_variable_initializations(c_code: &mut String, variables: HashSet<ir::Variable>) {
+    c_code.push_str("char *input = NULL;\n");
+    c_code.push_str("char *output = NULL;\n");
+    c_code.push_str("int bufferSize = NULL;\n");
+    variables.iter().for_each(|var| c_code.push_str(format!("long long int {} = 0;\n", ir_variable_to_c_variable(var)).as_str()));
+}
+
+fn generate_imports(c_code: &mut String) {
+    c_code.push_str("#include <stdio.h>\n");
+    c_code.push_str("#include <stdlib.h>\n");
+    c_code.push_str("#include <string.h>\n");
 }
 
 fn instruction_to_c(instruction: ir::Instruction) -> String {
@@ -73,10 +62,10 @@ fn instruction_to_c(instruction: ir::Instruction) -> String {
             format!("printf(\"%d\", {});\n", ir_variable_to_c_variable(&variable))
         }
         Instruction::PrintStringInstruction(variable) => {
-            get_c_for_print_string_instruction(variable)
+            codegen_utils::get_c_for_print_string_instruction(variable)
         }
         Instruction::InputInstruction(variable) => {
-            get_c_for_input_insruction(variable)
+            codegen_utils::get_c_for_input_insruction(variable)
         }
         Instruction::ExitInstruction => {
             "exit(0);\n".to_string()
@@ -130,31 +119,6 @@ fn condition_to_c(condition: ir::Condition) -> String {
             format!("{} < {}", ir_expression_to_c(lhs), ir_expression_to_c(rhs))
         }
     }
-}
-
-fn get_c_for_input_insruction(variable: ir::Variable) -> String {
-    format!("\
-    bufferSize = 100; \n\
-    input = (char *) malloc(bufferSize * sizeof(char)); \n\
-    if (input == NULL) {{ \n\
-        printf(\"Memory allocation failed\\n\"); \n\
-        return 1; \n\
-    }} \n\
-    get_input(input, bufferSize); \n\
-    {} = string_to_number(input); \n\
-    free(input);\n", ir_variable_to_c_variable(&variable))
-}
-
-fn get_c_for_print_string_instruction(variable: ir::Variable) -> String {
-    format!("\
-    output = (char *) malloc(100 * sizeof(char)); \n\
-    if (output == NULL) {{ \n\
-        printf(\"Memory allocation failed\\n\"); \n\
-        return 1; \n\
-    }} \n\
-    number_to_string({}, output); \n\
-    printf(\"%s\", output); \n\
-    free(output);\n", ir_variable_to_c_variable(&variable))
 }
 
 fn get_goto_macro(ir: &Vec<ir::Instruction>) -> String {
