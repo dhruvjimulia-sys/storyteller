@@ -36,4 +36,4 @@ Lastly, to run unit and integration tests on the interpreter and compiler, run t
 ```
 cargo test --release
 ```
-
+In order to run the tests, you would require `gcc` on your machine. The current version of `gcc` is `11.4.0`.
