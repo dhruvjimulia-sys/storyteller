@@ -171,17 +171,13 @@ fn statement_parser(keyword_defs: &KeywordDefs) -> impl Parser<LexerToken, ast::
         take_until(end())
         .map(|_| ast::Statement::Comment);
 
-    fn if_statement<'a>(statement_parser: Recursive<'a, LexerToken, ast::Statement, Simple<LexerToken>>, keyword_defs: &KeywordDefs) -> impl Parser<LexerToken, ast::Statement, Error = Simple<LexerToken>> + 'a {
-        fn to_strings(set: HashSet<&str>) -> HashSet<String> {
-            set.into_iter().map(|s| s.to_string()).collect::<HashSet<_>>()
-        }
-        
+    fn if_statement<'a>(statement_parser: Recursive<'a, LexerToken, ast::Statement, Simple<LexerToken>>, keyword_defs: &KeywordDefs) -> impl Parser<LexerToken, ast::Statement, Error = Simple<LexerToken>> + 'a {        
         let comma = just(LexerToken::Comma);
         let optional_surbodinate_clause = just(LexerToken::Comma).then(any::<LexerToken, Simple<LexerToken>>().repeated()).or_not();
         let greater_than_condition = keywords(&keyword_defs.to_be).or(keyword("felt")).then(keywords(&keyword_defs.positive_comparative_adjective)).then(keyword("than"));
         let less_than_condition = keywords(&keyword_defs.to_be).or(keyword("felt")).then(keywords(&keyword_defs.negative_comparative_adjective)).then(keyword("than"));
-        let equal_to_condition = keywords(&keyword_defs.to_be).or(keywords(&to_strings(HashSet::from(["want to be like", "wanted to be like", "wants to be like"])))); 
-        let not_equal_to_condition = keywords(&keyword_defs.to_be).ignore_then(keyword("not")).or(keywords(&to_strings(HashSet::from(["did not want to be like", "does not want to be like"])))); 
+        let equal_to_condition = keywords(&keyword_defs.to_be); 
+        let not_equal_to_condition = keywords(&keyword_defs.to_be).ignore_then(keyword("not")); 
         let condition_start_tokens = keyword_defs.to_be.clone().into_iter().chain(vec!["felt".to_string()]).collect::<HashSet<_>>(); 
         
         let condition =

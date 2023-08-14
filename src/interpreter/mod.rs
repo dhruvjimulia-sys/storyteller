@@ -36,8 +36,8 @@ fn number_to_string(value: BigUint) -> String {
     let mut result = String::new();
     let mut value = value;
     while value > 0u8.into() {
-        let remainder = value.clone().rem(1000u32);
-        result.push((remainder.to_u32_digits()[0] as u8) as char);
+        let num = value.clone().rem(1000u32).to_u32_digits()[0] % 128u32;
+        result.push((num as u8) as char);
         value = value / 1000u32;
     }
     result.chars().rev().collect()
