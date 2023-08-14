@@ -19,7 +19,7 @@ The resulting C file can then be compiled to assembly using a C compiler like `g
 ## Learning Storyteller
 Currently, the best resource to learn the Storyteller language is the [Storyteller Language Reference](https://github.com/dhruvjimulia-sys/storyteller/wiki/The-Storyteller-Language-Specification).
 
-For an example of a Storyteller program, you can look at the following [FizzBuzz program](https://github.com/dhruvjimulia-sys/storyteller/blob/main/examples/advanced/fizzbuzz.story), designed to look like the intense, riveting story of Cinderella.
+For an example of a Storyteller program, you can look at the following [FizzBuzz program](https://raw.githubusercontent.com/dhruvjimulia-sys/storyteller/main/examples/advanced/fizzbuzz.story?token=GHSAT0AAAAAACELBP4Y637NZNQ7G2YACYB2ZG2IS6Q), designed to look like the intense, riveting story of Cinderella.
 
 ## Build From Source
 In order to build the compiler from source, you would need `cargo`, the Rust package manager. The current version of `cargo` used is `v1.70.0`.
