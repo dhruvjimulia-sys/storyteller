@@ -4,7 +4,7 @@ Storyteller is a high-level, dynamically-typed programming language, designed to
 
 ## Quick Start
 
-The Storyteller compiler and interpreter binary can be downloaded from [here](https://github.com/dhruvjimulia-sys/storyteller/releases/download/v0.1.0/storyteller).
+The Storyteller compiler and interpreter binary can be downloaded from [here](https://github.com/dhruvjimulia-sys/storyteller/releases/download/v1.0.0/storyteller).
 
 After adding this storyteller binary to the `PATH` environment variable, you can invoke the interpreter on a `.story` file by using the following command. For instance, you can run `sherlock_holmes.story` as follows:
 ```_
