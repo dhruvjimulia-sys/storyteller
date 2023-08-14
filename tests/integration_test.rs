@@ -33,7 +33,7 @@ fn test_interpreter() {
 fn test_compiler() {
     let examples_directory = "examples";
     let examples_directory_path = Path::new(examples_directory);
-    let examples_compiler_output_directory = "examples_compiler_output";
+    let examples_compiler_output_directory = "tests_output";
     let examples_compiler_output_directory_path = Path::new(examples_compiler_output_directory);
     if Path::try_exists(examples_compiler_output_directory_path).unwrap() {
         fs::remove_dir_all(examples_compiler_output_directory_path).unwrap();
