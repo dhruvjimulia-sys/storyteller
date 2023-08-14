@@ -13,7 +13,7 @@ pub enum Instruction {
     AddInstruction(Variable, Expression),
     SubInstruction(Variable, Expression),
     PrintNumberInstruction(Variable),
-    PrintCharacterInstruction(Variable),
+    PrintStringInstruction(Variable),
     InputInstruction(Variable),
     ExitInstruction,
     GotoInstruction(Expression),
@@ -47,7 +47,7 @@ impl fmt::Display for Instruction {
             Instruction::PrintNumberInstruction(variable) => {
                 write!(f, "print {}", variable.0)
             }
-            Instruction::PrintCharacterInstruction(variable) => {
+            Instruction::PrintStringInstruction(variable) => {
                 write!(f, "printc {}", variable.0)
             }
             Instruction::InputInstruction(variable) => {

@@ -12,7 +12,7 @@ After adding this storyteller binary to the `PATH` environment variable, you can
 ```
 However, in order to use Storyteller in high-performance, low-latency applications, you can also use the Storyteller compiler, which will compile the Storyteller program to fast, efficient C:
 ```
-./storyteller sherlock_holmes.story -c sherlock_holmes.c
+./storyteller sherlock_holmes.story sherlock_holmes.c
 ```
 The resulting C file can then be compiled to assembly using a C compiler like `gcc` or `clang`.
 

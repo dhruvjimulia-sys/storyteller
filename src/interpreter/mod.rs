@@ -102,7 +102,7 @@ fn interpret_instruction(instruction: ir::Instruction, variable_values: &mut Has
                 Err(_) => { output_error().display() }
             };
         }
-        ir::Instruction::PrintCharacterInstruction(variable) => {
+        ir::Instruction::PrintStringInstruction(variable) => {
             match write!(output_stream, "{}", number_to_string(get_variable_value(variable.clone(), variable_values))) {
                 Ok(_) => {}
                 Err(_) => { input_error().display() }

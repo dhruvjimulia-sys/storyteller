@@ -3,11 +3,9 @@ use std::collections::HashSet;
 use num::{BigUint, Zero};
 use chumsky::prelude::*;
 pub mod ir;
-mod variable_extractor;
 mod pronoun_replacer;
 
-pub fn convert_ast_to_ir(ast: ast::Program) -> Vec<ir::Instruction> {
-    let variables = variable_extractor::get_variables(&ast);
+pub fn convert_ast_to_ir(ast: ast::Program, variables: &HashSet<ir::Variable>) -> Vec<ir::Instruction> {
     let processed_ast = pronoun_replacer::replace_pronouns(&ast, &variables);
     let mut ir: Vec<ir::Instruction> = Vec::new();
     processed_ast.0.iter().enumerate().for_each(|(i, block)| {
@@ -37,7 +35,7 @@ fn statement_to_ir(statement: &ast::Statement, variables: &HashSet<ir::Variable>
             Some(ir::Instruction::PrintNumberInstruction(ir::Variable(variable.0.clone())))
         }
         ast::Statement::PrintStringStatement(ref variable) => {
-            Some(ir::Instruction::PrintCharacterInstruction(ir::Variable(variable.0.clone())))
+            Some(ir::Instruction::PrintStringInstruction(ir::Variable(variable.0.clone())))
         }
         ast::Statement::InputStatement(ref variable) => {
             Some(ir::Instruction::InputInstruction(ir::Variable(variable.0.clone())))
