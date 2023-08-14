@@ -1,5 +1,5 @@
 Input:
-Hello World
-!
+Hello
+World
 Output:
-Hello World!
+HelloWorld

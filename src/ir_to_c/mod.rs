@@ -8,17 +8,17 @@ pub fn convert_ir_to_c(ir: Vec<ir::Instruction>, variables: HashSet<ir::Variable
     let mut c_code = String::new();
     c_code.push_str("#include <stdio.h>\n");
     c_code.push_str("#include <stdlib.h>\n");
+    c_code.push_str("#include <string.h>\n");
     c_code.push_str(get_goto_macro(&ir).as_str());
-    c_code.push_str("int string_to_number(char *string) {
-        int result = 0;
-        while (*string != '\\0') {
-            result = result * 1000 + *string;
-            string++;
+    c_code.push_str("long long int string_to_number(char *string) {
+        long long int result = 0;
+        for (int i = strlen(string) - 1; i >= 0; i--) {
+            result = result * 1000 + string[i];
         }
         return result;
     }\n");
-    c_code.push_str("int number_to_string(int number, char* output) {
-        int i = 0;
+    c_code.push_str("long long int number_to_string(long long int number, char* output) {
+        long long int i = 0;
         while (number > 0) {
             output[i] = (number % 1000) % 128;
             number /= 1000;
@@ -27,10 +27,30 @@ pub fn convert_ir_to_c(ir: Vec<ir::Instruction>, variables: HashSet<ir::Variable
         output[i] = '\\0';
         return i;
     }\n");
+    c_code.push_str("void get_input(char *input, int bufferSize) {
+        long long int index = 0; 
+        long long int ch;
+        while ((ch = getchar()) != '\\n' && ch != EOF) {
+            if (index >= bufferSize - 1) {
+                bufferSize *= 2;
+                char *newInput = (char *) realloc (input, bufferSize * sizeof(char));
+                if (newInput == NULL) {
+                    printf(\"Memory reallocation failed\\n\");
+                    free(input);
+                    exit(1);
+                }
+                input = newInput;
+            }
+            input[index] = ch;
+            index++;
+        }
+        input[index] = '\\0';   
+    }");
     c_code.push_str("int main() {\n");
     c_code.push_str("char *input;\n");
     c_code.push_str("char *output;\n");
-    variables.iter().for_each(|var| c_code.push_str(format!("int {} = 0;\n", ir_variable_to_c_variable(var)).as_str()));
+    c_code.push_str("int bufferSize;\n");
+    variables.iter().for_each(|var| c_code.push_str(format!("long long int {} = 0;\n", ir_variable_to_c_variable(var)).as_str()));
     for instruction in ir {
         c_code.push_str(&instruction_to_c(instruction));
     }
@@ -114,12 +134,13 @@ fn condition_to_c(condition: ir::Condition) -> String {
 
 fn get_c_for_input_insruction(variable: ir::Variable) -> String {
     format!("\
-    input = (char *) malloc(100 * sizeof(char)); \n\
+    bufferSize = 100; \n\
+    input = (char *) malloc(bufferSize * sizeof(char)); \n\
     if (input == NULL) {{ \n\
         printf(\"Memory allocation failed\\n\"); \n\
         return 1; \n\
     }} \n\
-    get_input(input); \n\
+    get_input(input, bufferSize); \n\
     {} = string_to_number(input); \n\
     free(input);\n", ir_variable_to_c_variable(&variable))
 }
